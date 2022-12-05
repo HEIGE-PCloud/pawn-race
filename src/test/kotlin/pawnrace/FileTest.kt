@@ -27,13 +27,13 @@ class FileTest {
 
   @Test
   fun `test toString`() {
-    assertEquals("A", File('A').toString())
-    assertEquals("B", File('B').toString())
-    assertEquals("C", File('C').toString())
-    assertEquals("D", File('D').toString())
-    assertEquals("E", File('E').toString())
-    assertEquals("F", File('F').toString())
-    assertEquals("G", File('G').toString())
-    assertEquals("H", File('H').toString())
+    assertEquals("a", File('A').toString())
+    assertEquals("b", File('B').toString())
+    assertEquals("c", File('C').toString())
+    assertEquals("d", File('D').toString())
+    assertEquals("e", File('E').toString())
+    assertEquals("f", File('F').toString())
+    assertEquals("g", File('G').toString())
+    assertEquals("h", File('H').toString())
   }
 }

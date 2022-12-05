@@ -6,4 +6,11 @@ class Position(pos: String) {
 
   override fun toString(): String =
     file.toString() + rank.toString()
+
+  override fun equals(other: Any?): Boolean = when (other) {
+    is Position -> file == other.file && rank == other.rank
+    else -> false
+  }
+
+  override fun hashCode(): Int = 31 * file.hashCode() + rank.hashCode()
 }
