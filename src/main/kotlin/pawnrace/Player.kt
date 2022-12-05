@@ -47,7 +47,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
   fun isPassedPawn(board: Board, pos: Position): Boolean {
     if (board.pieceAt(pos) != piece) return false
     val startRow = pos.rank.value + piece.direction()
-    val endRow = piece.endRow()
+    val endRow = piece.promotionRank()
     val col = pos.file.value
     val leftCol = col - 1
     val rightCol = col + 1
