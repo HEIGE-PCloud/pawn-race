@@ -2,28 +2,28 @@ package pawnrace
 
 import kotlin.math.abs
 
-const val size = 8
-const val whiteStartingFile = 1
-const val blackStartingFile = 6
+const val BOARD_SIZE = 8
+const val WHITE_START_FILE = 1
+const val BLACK_START_FILE = 6
 
 class Board(private val board: List<List<Piece?>>) {
-  constructor(whiteGap: File, blackGap: File) : this(List(size) { i ->
+  constructor(whiteGap: File, blackGap: File) : this(List(BOARD_SIZE) { i ->
     when (i) {
-      whiteStartingFile -> List(size) { j ->
+      WHITE_START_FILE -> List(BOARD_SIZE) { j ->
         when (j) {
           whiteGap.value -> null
           else -> Piece.WHITE
         }
       }
 
-      blackStartingFile -> List(size) { j ->
+      BLACK_START_FILE -> List(BOARD_SIZE) { j ->
         when (j) {
           blackGap.value -> null
           else -> Piece.BLACK
         }
       }
 
-      else -> List(size) { null }
+      else -> List(BOARD_SIZE) { null }
     }
   })
 
@@ -40,7 +40,7 @@ class Board(private val board: List<List<Piece?>>) {
     return list.toList()
   }
 
-  private fun withinBoard(i: Int) = i in 0 until size
+  private fun withinBoard(i: Int) = i in 0 until BOARD_SIZE
   fun isValidMove(move: Move, lastMove: Move? = null): Boolean {
     val colFrom = move.from.file.value
     val colTo = move.to.file.value
@@ -60,8 +60,8 @@ class Board(private val board: List<List<Piece?>>) {
       if (board[rowFrom + direction][colTo] != null) return false
       // if move dist 2, can only move from the starting position
       if (distance == 2) {
-        if (move.piece == Piece.BLACK && rowFrom != blackStartingFile) return false
-        if (move.piece == Piece.WHITE && rowFrom != whiteStartingFile) return false
+        if (move.piece == Piece.BLACK && rowFrom != BLACK_START_FILE) return false
+        if (move.piece == Piece.WHITE && rowFrom != WHITE_START_FILE) return false
       }
     } else if (move.type == MoveType.CAPTURE) {
       // needs to move diag
@@ -98,9 +98,9 @@ class Board(private val board: List<List<Piece?>>) {
     return true
   }
 
-  fun move(m: Move): Board = Board(List(size) { i ->
+  fun move(m: Move): Board = Board(List(BOARD_SIZE) { i ->
     when (i) {
-      m.from.rank.value -> List(size) { j ->
+      m.from.rank.value -> List(BOARD_SIZE) { j ->
         when (j) {
           m.from.file.value -> null
           m.to.file.value -> when(m.type) {
@@ -111,14 +111,14 @@ class Board(private val board: List<List<Piece?>>) {
         }
       }
 
-      m.to.rank.value -> List(size) { j ->
+      m.to.rank.value -> List(BOARD_SIZE) { j ->
         when (j) {
           m.to.file.value -> m.piece
           else -> board[i][j]
         }
       }
 
-      else -> List(size) { j ->
+      else -> List(BOARD_SIZE) { j ->
         board[i][j]
       }
     }

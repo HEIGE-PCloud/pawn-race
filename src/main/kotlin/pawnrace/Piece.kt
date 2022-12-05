@@ -15,6 +15,6 @@ enum class Piece {
 
   fun endRow() = when(this) {
     BLACK -> 0
-    WHITE -> size - 1
+    WHITE -> BOARD_SIZE - 1
   }
 }

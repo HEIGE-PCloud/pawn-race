@@ -46,9 +46,9 @@ class Game(val board: Board, val player: Player, val lastMove: Move? = null) {
   }
 
   private fun isPromoted(): Piece? {
-    for (i in 0 until size) {
-      if (board.pieceAt(Position(size - 1, i)) == Piece.WHITE) return Piece.WHITE
-      if (board.pieceAt(Position(size - 1, i)) == Piece.BLACK) return Piece.BLACK
+    for (i in 0 until BOARD_SIZE) {
+      if (board.pieceAt(Position(BOARD_SIZE - 1, i)) == Piece.WHITE) return Piece.WHITE
+      if (board.pieceAt(Position(BOARD_SIZE - 1, i)) == Piece.BLACK) return Piece.BLACK
     }
     return null
   }
