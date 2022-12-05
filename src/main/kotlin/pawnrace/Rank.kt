@@ -1,8 +1,8 @@
 package pawnrace
 
-class Rank(pos: Char) {
-  constructor(row: Int) : this((row + 1).digitToChar())
-  val value = pos.digitToInt() - 1
+class Rank(row: Int) {
+  constructor(pos: Char) : this(pos.digitToInt() - 1)
+  val value = row
 
   override fun toString(): String =
     (value + 1).toString()

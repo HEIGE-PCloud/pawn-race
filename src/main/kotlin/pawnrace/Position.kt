@@ -1,9 +1,10 @@
 package pawnrace
 
-class Position(pos: String) {
-  val file = File(pos[0])
-  val rank = Rank(pos[1])
+class Position(row: Int, col: Int) {
+  val file = File(col)
+  val rank = Rank(row)
 
+  constructor(pos: String) : this(Rank(pos[1]).value, File(pos[0]).value)
   override fun toString(): String =
     file.toString() + rank.toString()
 

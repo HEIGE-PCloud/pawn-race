@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 class PositionTest {
   @Test
   fun `test toString`() {
-    assertEquals("A1", Position("A1").toString())
-    assertEquals("A1", Position("a1").toString())
+    assertEquals("a1", Position("A1").toString())
+    assertEquals("a1", Position("a1").toString())
   }
 }

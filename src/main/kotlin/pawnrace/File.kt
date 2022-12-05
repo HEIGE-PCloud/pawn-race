@@ -1,9 +1,9 @@
 package pawnrace
 
-class File(pos: Char) {
-  constructor(col: Int) : this((col + 'a'.code).toChar())
+class File(col: Int) {
+  constructor(pos: Char) : this(pos.lowercaseChar().code - 'a'.code)
 
-  val value = pos.lowercaseChar().code - 'a'.code
+  val value = col
 
   override fun toString(): String =
     (value + 'a'.code).toChar().toString()
