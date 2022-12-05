@@ -6,6 +6,9 @@ const val BOARD_SIZE = 8
 const val WHITE_START_FILE = 1
 const val BLACK_START_FILE = 6
 
+/**
+ * Board is an immutable type representing the current board status
+ */
 class Board(private val board: List<List<Piece?>>) {
   constructor(whiteGap: File, blackGap: File) : this(List(BOARD_SIZE) { i ->
     when (i) {
@@ -28,17 +31,18 @@ class Board(private val board: List<List<Piece?>>) {
   })
 
   fun pieceAt(pos: Position): Piece? = board[pos.rank.value][pos.file.value]
-  fun positionsOf(piece: Piece): List<Position> {
-    val list = mutableListOf<Position>()
-    for (i in 0..7) {
-      for (j in 0..7) {
-        if (board[i][j] == piece) {
-          list.add(Position(i, j))
-        }
-      }
+
+  /**
+   * Returns the Positions of a given Piece on the board -
+   * that is, all white or black pieces’ positions.
+   */
+  fun positionsOf(piece: Piece): List<Position> =
+    board.flatMapIndexed { i, row ->
+      row.mapIndexed { j, col ->
+        if (col == piece) Position(i, j)
+        else null
+      }.filterNotNull()
     }
-    return list.toList()
-  }
 
   private fun withinBoard(i: Int) = i in 0 until BOARD_SIZE
   fun isValidMove(move: Move, lastMove: Move? = null): Boolean {
@@ -46,7 +50,10 @@ class Board(private val board: List<List<Piece?>>) {
     val colTo = move.to.file.value
     val rowFrom = move.from.rank.value
     val rowTo = move.to.rank.value
-    if (!withinBoard(colFrom) || !withinBoard(colTo) || !withinBoard(rowFrom) || !withinBoard(rowTo)) return false
+    if (!withinBoard(colFrom) || !withinBoard(colTo) || !withinBoard(rowFrom) || !withinBoard(
+        rowTo
+      )
+    ) return false
     val direction = move.piece.direction()
     val distance = (rowTo - rowFrom) * direction
     if (move.type == MoveType.PEACEFUL) {
@@ -103,10 +110,11 @@ class Board(private val board: List<List<Piece?>>) {
       m.from.rank.value -> List(BOARD_SIZE) { j ->
         when (j) {
           m.from.file.value -> null
-          m.to.file.value -> when(m.type) {
+          m.to.file.value -> when (m.type) {
             MoveType.EN_PASSANT -> null
             else -> board[i][j]
           }
+
           else -> board[i][j]
         }
       }
