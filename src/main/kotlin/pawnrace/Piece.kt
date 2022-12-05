@@ -1,5 +1,10 @@
 package pawnrace
 
+fun Piece(c: Char): Piece = when(c) {
+  'W' -> Piece.WHITE
+  else -> Piece.BLACK
+}
+
 enum class Piece {
   BLACK, WHITE;
 

@@ -6,6 +6,9 @@ data class Move(
   val to: Position,
   val type: MoveType
 ) {
+  /**
+   * Returns the short algebraic notation for this move.
+   */
   override fun toString(): String = when(type) {
     MoveType.PEACEFUL -> to.toString()
     MoveType.CAPTURE -> "${from.file}x${to}"

@@ -1,8 +1,7 @@
 package pawnrace
 
-class Player(val piece: Piece, var opponent: Player? = null) {
+class Player(val piece: Piece) {
   fun getAllPawns(board: Board): List<Position> = board.positionsOf(piece)
-
   fun getAllValidMoves(board: Board): List<Move> = getAllPawns(board).flatMap { pos ->
     listOf(
       Move(
@@ -59,6 +58,6 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     return true
   }
 
-  fun makeMove(game: Game): Move? = getAllValidMoves(game.board).random()
+  fun makeMove(game: Game): Move = getAllValidMoves(game.board).random()
 
 }

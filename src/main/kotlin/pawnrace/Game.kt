@@ -1,8 +1,15 @@
 package pawnrace
 
-class Game(val board: Board, val player: Player, val lastMove: Move? = null) {
-  fun applyMove(move: Move): Game =
-    Game(board.move(move), player.opponent!!, move)
+class Game(board: Board, val me: Player, val opponent: Player) {
+  private val historyBoards = mutableListOf<Board>()
+  private val historyMoves = mutableListOf<Move>()
+  var board = board
+    private set
+  fun applyMove(move: Move) {
+    historyMoves.add(move)
+    historyBoards.add(board)
+    board = board.move(move)
+  }
 
   /**
    * Finds all possible valid moves.
@@ -23,26 +30,26 @@ class Game(val board: Board, val player: Player, val lastMove: Move? = null) {
 
   private fun moveForwardBy(pos: Position, step: Int, piece: Piece): Move? {
     val move = Move(
-      player.piece, pos, Position(
-        pos.rank.value + player.piece.direction() * step, pos.file.value
+      me.piece, pos, Position(
+        pos.rank.value + me.piece.direction() * step, pos.file.value
       ), MoveType.PEACEFUL
     )
-    return if (board.isValidMove(move, lastMove)) move else null
+    return if (board.isValidMove(move, historyMoves.last())) move else null
   }
 
   private fun moveDiagonalBy(
     pos: Position, isLeft: Boolean, piece: Piece, type: MoveType
   ): Move? {
     val move = Move(
-      player.piece, pos, Position(
-        pos.rank.value + player.piece.direction(),
+      me.piece, pos, Position(
+        pos.rank.value + me.piece.direction(),
         if (isLeft)
-          pos.file.value - player.piece.direction()
+          pos.file.value - me.piece.direction()
         else
-          pos.file.value + player.piece.direction()
+          pos.file.value + me.piece.direction()
       ), type
     )
-    return if (board.isValidMove(move, lastMove)) move else null
+    return if (board.isValidMove(move, historyMoves.last())) move else null
   }
 
   private fun isPromoted(): Piece? {
@@ -62,19 +69,28 @@ class Game(val board: Board, val player: Player, val lastMove: Move? = null) {
   }
   fun winner(): Player? {
     require(over())
-    var winnerPiece: Piece
+    var winnerPiece: Piece? = null
     for (i in 0..7) {
       if (board.pieceAt(Position(7, i)) == Piece.WHITE) winnerPiece = Piece.WHITE
       if (board.pieceAt(Position(7, i)) == Piece.BLACK) winnerPiece = Piece.BLACK
     }
+    if (winnerPiece != null) {
+      return pieceToPlayer(winnerPiece)
+    }
     val blackMoves = moves(Piece.BLACK)
     val whiteMoves = moves(Piece.WHITE)
+
     if (blackMoves.isEmpty() && whiteMoves.isEmpty()) return null
-    if (blackMoves.isEmpty()) winnerPiece = Piece.WHITE
-    else winnerPiece = Piece.BLACK
-    if (winnerPiece == player.piece) return player
-    return player.opponent
+
+    if (blackMoves.isEmpty()) return pieceToPlayer(Piece.WHITE)
+    return pieceToPlayer(Piece.BLACK)
   }
 
-  fun parseMove(san: String): Move? = TODO()
+  fun parseMove(piece: Piece, moveString: String): Move {
+
+  }
+  private fun pieceToPlayer(piece: Piece): Player = when(piece) {
+    me.piece -> me
+    else -> opponent
+  }
 }
