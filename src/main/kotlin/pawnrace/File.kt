@@ -1,15 +1,17 @@
 package pawnrace
 
 class File(pos: Char) {
-  val rank = pos.lowercaseChar().code - 'a'.code
+  constructor(col: Int) : this((col + 'a'.code).toChar())
+
+  val value = pos.lowercaseChar().code - 'a'.code
 
   override fun toString(): String =
-    (rank + 'a'.code).toChar().toString()
+    (value + 'a'.code).toChar().toString()
 
   override fun equals(other: Any?): Boolean = when (other) {
-    is File -> other.rank == rank
+    is File -> other.value == value
     else -> false
   }
 
-  override fun hashCode(): Int = rank.hashCode()
+  override fun hashCode(): Int = value.hashCode()
 }

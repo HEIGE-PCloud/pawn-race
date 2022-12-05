@@ -6,14 +6,14 @@ import kotlin.test.assertEquals
 class RankTest {
   @Test
   fun `test init`() {
-    assertEquals(0, Rank('1').rank)
-    assertEquals(1, Rank('2').rank)
-    assertEquals(2, Rank('3').rank)
-    assertEquals(3, Rank('4').rank)
-    assertEquals(4, Rank('5').rank)
-    assertEquals(5, Rank('6').rank)
-    assertEquals(6, Rank('7').rank)
-    assertEquals(7, Rank('8').rank)
+    assertEquals(0, Rank('1').value)
+    assertEquals(1, Rank('2').value)
+    assertEquals(2, Rank('3').value)
+    assertEquals(3, Rank('4').value)
+    assertEquals(4, Rank('5').value)
+    assertEquals(5, Rank('6').value)
+    assertEquals(6, Rank('7').value)
+    assertEquals(7, Rank('8').value)
   }
 
   @Test

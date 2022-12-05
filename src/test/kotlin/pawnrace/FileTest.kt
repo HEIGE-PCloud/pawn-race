@@ -6,23 +6,23 @@ import kotlin.test.assertEquals
 class FileTest {
   @Test
   fun `test init`() {
-    assertEquals(0, File('A').rank)
-    assertEquals(1, File('B').rank)
-    assertEquals(2, File('C').rank)
-    assertEquals(3, File('D').rank)
-    assertEquals(4, File('E').rank)
-    assertEquals(5, File('F').rank)
-    assertEquals(6, File('G').rank)
-    assertEquals(7, File('H').rank)
+    assertEquals(0, File('A').value)
+    assertEquals(1, File('B').value)
+    assertEquals(2, File('C').value)
+    assertEquals(3, File('D').value)
+    assertEquals(4, File('E').value)
+    assertEquals(5, File('F').value)
+    assertEquals(6, File('G').value)
+    assertEquals(7, File('H').value)
 
-    assertEquals(0, File('a').rank)
-    assertEquals(1, File('b').rank)
-    assertEquals(2, File('c').rank)
-    assertEquals(3, File('d').rank)
-    assertEquals(4, File('e').rank)
-    assertEquals(5, File('f').rank)
-    assertEquals(6, File('g').rank)
-    assertEquals(7, File('h').rank)
+    assertEquals(0, File('a').value)
+    assertEquals(1, File('b').value)
+    assertEquals(2, File('c').value)
+    assertEquals(3, File('d').value)
+    assertEquals(4, File('e').value)
+    assertEquals(5, File('f').value)
+    assertEquals(6, File('g').value)
+    assertEquals(7, File('h').value)
   }
 
   @Test

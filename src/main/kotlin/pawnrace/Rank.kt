@@ -1,15 +1,16 @@
 package pawnrace
 
 class Rank(pos: Char) {
-  val rank = pos.digitToInt() - 1
+  constructor(row: Int) : this((row + 1).digitToChar())
+  val value = pos.digitToInt() - 1
 
   override fun toString(): String =
-    (rank + 1).toString()
+    (value + 1).toString()
 
   override fun equals(other: Any?): Boolean = when(other) {
-    is Rank -> other.rank == rank
+    is Rank -> other.value == value
     else -> false
   }
 
-  override fun hashCode(): Int = rank.hashCode()
+  override fun hashCode(): Int = value.hashCode()
 }
