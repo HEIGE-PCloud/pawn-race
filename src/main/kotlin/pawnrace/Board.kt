@@ -39,16 +39,15 @@ class Board(private val board: List<List<Piece?>>) {
     }
     return list.toList()
   }
-  private fun direction(piece: Piece) = when(piece) {
-    Piece.BLACK -> -1
-    Piece.WHITE -> 1
-  }
+
+  private fun withinBoard(i: Int) = i in 0 until size
   fun isValidMove(move: Move, lastMove: Move? = null): Boolean {
     val colFrom = move.from.file.value
     val colTo = move.to.file.value
     val rowFrom = move.from.rank.value
     val rowTo = move.to.rank.value
-    val direction = direction(move.piece)
+    if (!withinBoard(colFrom) || !withinBoard(colTo) || !withinBoard(rowFrom) || !withinBoard(rowTo)) return false
+    val direction = move.piece.direction()
     val distance = (rowTo - rowFrom) * direction
     if (move.type == MoveType.PEACEFUL) {
       // check if in the same column
@@ -82,7 +81,7 @@ class Board(private val board: List<List<Piece?>>) {
       val lastRowTo = lastMove.to.rank.value
       val lastColFrom = lastMove.from.file.value
       val lastColTo = lastMove.to.file.value
-      val lastDirection = direction(lastMove.piece)
+      val lastDirection = lastMove.piece.direction()
       val lastDistance = (lastRowTo - lastRowFrom) * lastDirection
 
       // need to move 2
