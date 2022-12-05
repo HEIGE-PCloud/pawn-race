@@ -7,6 +7,8 @@ import kotlin.test.assertEquals
 class BoardTest {
   private val board1 = Board(File(0), File(0))
   private val board2 = Board(File(0), File(7))
+  private val board3 = Board(File('h'), File('a'))
+
 
   @Test
   fun `test init`() {
@@ -208,6 +210,50 @@ class BoardTest {
         Position(6, 6),
       ), board2.positionsOf(Piece.BLACK)
     )
+  }
+
+  @Test
+  fun `test isValidMove`() {
+    assertEquals(true, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(2, 1), MoveType.PEACEFUL)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(2, 1), MoveType.CAPTURE)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(2, 1), MoveType.EN_PASSANT)))
+    assertEquals(true, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(3, 1), MoveType.PEACEFUL)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(3, 1), MoveType.CAPTURE)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(3, 1), MoveType.EN_PASSANT)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(1, 4), MoveType.PEACEFUL)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(1, 4), MoveType.CAPTURE)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(1, 4), MoveType.EN_PASSANT)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(0, 1), MoveType.PEACEFUL)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(0, 1), MoveType.CAPTURE)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(0, 1), MoveType.EN_PASSANT)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(0, 0), Position(0, 1), MoveType.PEACEFUL)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(0, 0), Position(0, 1), MoveType.CAPTURE)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(0, 0), Position(0, 1), MoveType.EN_PASSANT)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(1, 1), MoveType.PEACEFUL)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(1, 1), MoveType.CAPTURE)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(1, 1), MoveType.EN_PASSANT)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(-1, -1), MoveType.PEACEFUL)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(-1, -1), MoveType.CAPTURE)))
+    assertEquals(false, board1.isValidMove(Move(Piece.WHITE, Position(1, 1), Position(-1, -1), MoveType.EN_PASSANT)))
+  }
+
+  @Test
+  fun `test isValidMove 2`() {
+    val move1 = Move(Piece.WHITE, Position(1, 1), Position(3, 1), MoveType.PEACEFUL)
+    assertEquals(true, board3.isValidMove(move1))
+    val board31 = board3.move(move1)
+    val move2 = Move(Piece.BLACK, Position("d7"), Position("d6"), MoveType.PEACEFUL)
+    assertEquals(true, board31.isValidMove(move2))
+    val board32 = board31.move(move2)
+    val move3 = Move(Piece.WHITE, Position("b4"), Position("b5"), MoveType.PEACEFUL)
+    assertEquals(true, board32.isValidMove(move3))
+    val board33 = board32.move(move3)
+    val move4 = Move(Piece.BLACK, Position("c7"), Position("c5"), MoveType.PEACEFUL)
+    assertEquals(true, board33.isValidMove(move4))
+    val board34 = board33.move(move4)
+    println(board34)
+    val move5 = Move(Piece.WHITE, Position("b5"), Position("c6"), MoveType.EN_PASSANT)
+    assertEquals(true, board34.isValidMove(move5, move4))
   }
 
 }

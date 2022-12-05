@@ -44,16 +44,14 @@ class Board(private val board: List<List<Piece?>>) {
       }.filterNotNull()
     }
 
-  private fun withinBoard(i: Int) = i in 0 until BOARD_SIZE
+  private fun withinBoard(i: Int): Boolean = i in 0 until BOARD_SIZE
+
   fun isValidMove(move: Move, lastMove: Move? = null): Boolean {
     val colFrom = move.from.file.value
     val colTo = move.to.file.value
     val rowFrom = move.from.rank.value
     val rowTo = move.to.rank.value
-    if (!withinBoard(colFrom) || !withinBoard(colTo) || !withinBoard(rowFrom) || !withinBoard(
-        rowTo
-      )
-    ) return false
+    if (!withinBoard(colFrom) || !withinBoard(colTo) || !withinBoard(rowFrom) || !withinBoard(rowTo)) return false
     val direction = move.piece.direction()
     val distance = (rowTo - rowFrom) * direction
     if (move.type == MoveType.PEACEFUL) {
@@ -82,11 +80,9 @@ class Board(private val board: List<List<Piece?>>) {
       if (lastMove == null) return false
       if (lastMove.type != MoveType.PEACEFUL) return false
       if (lastMove.piece != move.piece.opposite()) return false
-      if (!isValidMove(lastMove)) return false
 
       val lastRowFrom = lastMove.from.rank.value
       val lastRowTo = lastMove.to.rank.value
-      val lastColFrom = lastMove.from.file.value
       val lastColTo = lastMove.to.file.value
       val lastDirection = lastMove.piece.direction()
       val lastDistance = (lastRowTo - lastRowFrom) * lastDirection
