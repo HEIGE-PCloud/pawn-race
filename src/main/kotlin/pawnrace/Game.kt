@@ -5,6 +5,7 @@ class Game(board: Board, val me: Player, val opponent: Player) {
   private val historyMoves = mutableListOf<Move>()
   var board = board
     private set
+
   fun applyMove(move: Move) {
     historyMoves.add(move)
     historyBoards.add(board)
@@ -54,8 +55,20 @@ class Game(board: Board, val me: Player, val opponent: Player) {
 
   private fun isPromoted(): Piece? {
     for (i in 0 until BOARD_SIZE) {
-      if (board.pieceAt(Position(BOARD_SIZE - 1, i)) == Piece.WHITE) return Piece.WHITE
-      if (board.pieceAt(Position(BOARD_SIZE - 1, i)) == Piece.BLACK) return Piece.BLACK
+      if (board.pieceAt(
+          Position(
+            BOARD_SIZE - 1,
+            i
+          )
+        ) == Piece.WHITE
+      ) return Piece.WHITE
+      if (board.pieceAt(
+          Position(
+            BOARD_SIZE - 1,
+            i
+          )
+        ) == Piece.BLACK
+      ) return Piece.BLACK
     }
     return null
   }
@@ -67,12 +80,15 @@ class Game(board: Board, val me: Player, val opponent: Player) {
     if (blackMoves.isEmpty() || whiteMoves.isEmpty()) return true
     return false
   }
+
   fun winner(): Player? {
     require(over())
     var winnerPiece: Piece? = null
     for (i in 0..7) {
-      if (board.pieceAt(Position(7, i)) == Piece.WHITE) winnerPiece = Piece.WHITE
-      if (board.pieceAt(Position(7, i)) == Piece.BLACK) winnerPiece = Piece.BLACK
+      if (board.pieceAt(Position(7, i)) == Piece.WHITE) winnerPiece =
+        Piece.WHITE
+      if (board.pieceAt(Position(7, i)) == Piece.BLACK) winnerPiece =
+        Piece.BLACK
     }
     if (winnerPiece != null) {
       return pieceToPlayer(winnerPiece)
@@ -87,9 +103,26 @@ class Game(board: Board, val me: Player, val opponent: Player) {
   }
 
   fun parseMove(piece: Piece, moveString: String): Move {
-
+    if (moveString.contains('-')) {
+      val (fromString, toString) = moveString.split('-')
+      return Move(
+        piece,
+        Position(fromString),
+        Position(toString),
+        MoveType.PEACEFUL
+      )
+    } else {
+      val (fromString, toString) = moveString.split('x')
+      val from = Position(fromString)
+      val to = Position(toString)
+      val enPassantMove = Move(piece, from, to, MoveType.EN_PASSANT)
+      if (board.isValidMove(enPassantMove))
+        return enPassantMove
+      return Move(piece, from, to, MoveType.CAPTURE)
+    }
   }
-  private fun pieceToPlayer(piece: Piece): Player = when(piece) {
+
+  private fun pieceToPlayer(piece: Piece): Player = when (piece) {
     me.piece -> me
     else -> opponent
   }
