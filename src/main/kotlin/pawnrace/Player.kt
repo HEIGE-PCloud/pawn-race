@@ -59,6 +59,6 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     return true
   }
 
-  fun makeMove(game: Game): Move? = TODO()
+  fun makeMove(game: Game): Move? = getAllValidMoves(game.board).random()
 
 }
