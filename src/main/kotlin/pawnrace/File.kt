@@ -5,4 +5,11 @@ class File(pos: Char) {
 
   override fun toString(): String =
     (rank + 'A'.code).toChar().toString()
+
+  override fun equals(other: Any?): Boolean = when (other) {
+    is File -> other.rank == rank
+    else -> false
+  }
+
+  override fun hashCode(): Int = rank.hashCode()
 }
