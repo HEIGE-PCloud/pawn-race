@@ -58,9 +58,10 @@ class PawnRace {
     */
     while (true) {
       val opponentMoveString: String = input.readLine()
+      println("[INFO] Received opponent's move $opponentMoveString")
+
       val opponentMove = game.parseMove(opponent.piece, opponentMoveString)
-      println("[INFO] Received opponent's move $opponentMove")
-      game.applyMove(opponentMove)
+      game.applyMove(opponentMove!!)
       println(game.board)
       if (game.over()) break
       val move: Move = me.makeMove(game)

@@ -102,24 +102,58 @@ class Game(board: Board, val me: Player, val opponent: Player) {
     return pieceToPlayer(Piece.BLACK)
   }
 
-  fun parseMove(piece: Piece, moveString: String): Move {
-    if (moveString.contains('-')) {
-      val (fromString, toString) = moveString.split('-')
-      return Move(
-        piece,
-        Position(fromString),
-        Position(toString),
-        MoveType.PEACEFUL
-      )
-    } else {
-      val (fromString, toString) = moveString.split('x')
-      val from = Position(fromString)
-      val to = Position(toString)
-      val enPassantMove = Move(piece, from, to, MoveType.EN_PASSANT)
-      if (board.isValidMove(enPassantMove))
-        return enPassantMove
-      return Move(piece, from, to, MoveType.CAPTURE)
+  fun parseMove(piece: Piece, moveString: String): Move? {
+    if (moveString.length == 2) {
+      val file = File(moveString[0])
+      val posTo = Position(moveString)
+      for (i in 0 until BOARD_SIZE) {
+        val curPos = Position(i, file.value)
+        if (board.pieceAt(curPos) == piece) {
+          val move = Move(piece, curPos, posTo, MoveType.PEACEFUL)
+          if (board.isValidMove(move)) {
+            return move
+          }
+        }
+      }
     }
+    else if (moveString.length == 4) {
+      val (fileString, posToString) = moveString.split('x')
+      val file = File(fileString[0])
+      val posTo = Position(posToString)
+      for (i in 0 until BOARD_SIZE) {
+        val curPos = Position(i, file.value)
+        if (board.pieceAt(curPos) == piece) {
+          val moveCapture = Move(piece, curPos, posTo, MoveType.CAPTURE)
+          val moveEnPassant = Move(piece, curPos, posTo, MoveType.EN_PASSANT)
+          if (board.isValidMove(moveCapture)) {
+            return moveCapture
+          }
+          if (board.isValidMove(moveEnPassant)) {
+            return moveEnPassant
+          }
+        }
+      }
+    }
+    else if (moveString.length == 5) {
+      if (moveString.contains('-')) {
+        val (fromString, toString) = moveString.split('-')
+        return Move(
+          piece,
+          Position(fromString),
+          Position(toString),
+          MoveType.PEACEFUL
+        )
+      } else {
+        val (fromString, toString) = moveString.split('x')
+        val from = Position(fromString)
+        val to = Position(toString)
+        val enPassantMove = Move(piece, from, to, MoveType.EN_PASSANT)
+        if (board.isValidMove(enPassantMove))
+          return enPassantMove
+        return Move(piece, from, to, MoveType.CAPTURE)
+      }
+    }
+    return null
   }
 
   private fun pieceToPlayer(piece: Piece): Player = when (piece) {
