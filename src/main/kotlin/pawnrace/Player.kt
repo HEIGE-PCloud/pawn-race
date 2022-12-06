@@ -52,14 +52,14 @@ class Player(val piece: Piece, var opponent: Player? = null) {
       }
       // finally, add score if a pawn chain is formed
       if (game.board.pieceAt(move.to.leftBack()) == piece) {
-        score += 1
+        score += 2
       } else if (game.board.pieceAt(move.to.leftFront()) == piece) {
-        score += 1
+        score += 2
       }
       if (game.board.pieceAt(move.to.rightBack()) == piece) {
-        score += 1
+        score += 2
       } else if (game.board.pieceAt(move.to.rightFront()) == piece) {
-        score += 1
+        score += 2
       }
 
       acc + score
