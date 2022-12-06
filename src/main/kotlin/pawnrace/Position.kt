@@ -11,6 +11,23 @@ class Position(row: Int, col: Int) {
    */
   constructor(pos: String) : this(Rank(pos[1]).value, File(pos[0]).value)
 
+  fun leftBack(): Position? = when {
+    rank.value > 0 && file.value > 0  -> Position(rank.value - 1, file.value - 1)
+    else -> null
+  }
+  fun leftFront(): Position? = when {
+    rank.value < BOARD_SIZE - 1 && file.value > 0 -> Position(rank.value + 1, file.value - 1)
+    else -> null
+  }
+  fun rightBack(): Position? = when {
+    rank.value > 0 && file.value < BOARD_SIZE - 1 -> Position(rank.value - 1, file.value + 1)
+    else -> null
+  }
+  fun rightFront(): Position? = when {
+    rank.value < BOARD_SIZE - 1 && file.value < BOARD_SIZE - 1 -> Position(rank.value + 1, file.value + 1)
+    else -> null
+  }
+
   /**
    * Returns the short algebraic notation of this position.
    */

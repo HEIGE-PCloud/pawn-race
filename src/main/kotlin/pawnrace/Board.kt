@@ -55,7 +55,10 @@ class Board(private val board: List<List<Piece?>>) {
     }
     hash = Pair(first, second)
   }
-  fun pieceAt(pos: Position): Piece? = board[pos.rank.value][pos.file.value]
+  fun pieceAt(pos: Position?): Piece? = when (pos) {
+    null -> null
+    else -> board[pos.rank.value][pos.file.value]
+  }
 
   /**
    * Returns the Positions of a given Piece on the board -
