@@ -35,4 +35,9 @@ enum class Piece {
     BLACK -> 0
     WHITE -> BOARD_SIZE - 1
   }
+
+  fun startingRank() = when(this) {
+    BLACK -> BLACK_START_RANK
+    WHITE -> WHITE_START_RANK
+  }
 }

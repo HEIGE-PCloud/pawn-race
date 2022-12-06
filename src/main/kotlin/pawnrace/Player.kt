@@ -1,5 +1,8 @@
 package pawnrace
 
+import kotlin.math.abs
+import kotlin.math.max
+
 class Player(val piece: Piece, var opponent: Player? = null) {
   fun getAllPawns(board: Board): List<Position> = board.positionsOf(piece)
   private fun getAllValidMoves(game: Game): List<Move> = game.moves(piece)
@@ -19,7 +22,33 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     return true
   }
 
-  fun makeMove(game: Game): Move = getAllValidMoves(game).random()
+  fun evaluate(game: Game): Double {
+    val positions = getAllPawns(game.board)
+    return positions.fold(0.0) { acc, pos ->
+      acc + abs(pos.rank.value - piece.startingRank())
+    }
+  }
+
+  fun negaMax(game: Game, depth: Int): Double {
+    if (depth == 0) return evaluate(game)
+    var maxScore = Double.MIN_VALUE
+    val allMoves = getAllValidMoves(game)
+    for (move in allMoves) {
+      maxScore = max(-1 * negaMax(game, depth - 1), maxScore)
+    }
+    return maxScore;
+  }
+
+  fun makeMove(game: Game): Move {
+    val moves = getAllValidMoves(game)
+    val games = moves.map { game.applyMove(it) }
+    val scores = games.map { negaMax(it, 5) }
+    val maxScore = scores.max()
+    val maxIndex = scores.indexOf(maxScore)
+    return moves[maxIndex]
+  }
+
+
 
   override fun toString(): String {
     return "Player $piece"

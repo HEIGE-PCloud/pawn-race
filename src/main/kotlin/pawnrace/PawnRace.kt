@@ -39,7 +39,6 @@ class PawnRace {
     // Initialise the board state
     val board = Board(File(gaps[0]), File(gaps[1]))
     val game = Game(board, me)
-    println(board)
     // If you are the white player, you are now allowed to move
     // you may send your move, once you have decided what it will be, with output.println(move)
     // for example: output.println("axb4")

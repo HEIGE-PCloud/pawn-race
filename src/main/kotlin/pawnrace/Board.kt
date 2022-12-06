@@ -3,8 +3,8 @@ package pawnrace
 import kotlin.math.abs
 
 const val BOARD_SIZE = 8
-const val WHITE_START_FILE = 1
-const val BLACK_START_FILE = 6
+const val WHITE_START_RANK = 1
+const val BLACK_START_RANK = 6
 
 /**
  * Board is an immutable type representing the current board status
@@ -12,14 +12,14 @@ const val BLACK_START_FILE = 6
 class Board(private val board: List<List<Piece?>>) {
   constructor(whiteGap: File, blackGap: File) : this(List(BOARD_SIZE) { i ->
     when (i) {
-      WHITE_START_FILE -> List(BOARD_SIZE) { j ->
+      WHITE_START_RANK -> List(BOARD_SIZE) { j ->
         when (j) {
           whiteGap.value -> null
           else -> Piece.WHITE
         }
       }
 
-      BLACK_START_FILE -> List(BOARD_SIZE) { j ->
+      BLACK_START_RANK -> List(BOARD_SIZE) { j ->
         when (j) {
           blackGap.value -> null
           else -> Piece.BLACK
@@ -65,8 +65,8 @@ class Board(private val board: List<List<Piece?>>) {
       if (board[rowFrom + direction][colTo] != null) return false
       // if move dist 2, can only move from the starting position
       if (distance == 2) {
-        if (move.piece == Piece.BLACK && rowFrom != BLACK_START_FILE) return false
-        if (move.piece == Piece.WHITE && rowFrom != WHITE_START_FILE) return false
+        if (move.piece == Piece.BLACK && rowFrom != BLACK_START_RANK) return false
+        if (move.piece == Piece.WHITE && rowFrom != WHITE_START_RANK) return false
       }
     } else if (move.type == MoveType.CAPTURE) {
       // needs to move diag
