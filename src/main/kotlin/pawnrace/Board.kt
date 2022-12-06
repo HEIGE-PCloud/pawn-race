@@ -10,6 +10,15 @@ const val BLACK_START_RANK = 6
  * Board is an immutable type representing the current board status
  */
 class Board(private val board: List<List<Piece?>>) {
+  /**
+   * hash.first is a 64-bit unsigned integer, each digit represents
+   * whether there exists a chess on that grid
+   * hash.second is a 64-bit unsigned integer as well,
+   * each digit represents the color of the chess there
+   * if it is empty, then a 0 is placed
+   * each hash uniquely determins a board
+   */
+  private val hash: Pair<ULong, ULong>
   constructor(whiteGap: File, blackGap: File) : this(List(BOARD_SIZE) { i ->
     when (i) {
       WHITE_START_RANK -> List(BOARD_SIZE) { j ->
@@ -30,6 +39,22 @@ class Board(private val board: List<List<Piece?>>) {
     }
   })
 
+  init {
+    var first: ULong = 0u
+    var second: ULong = 0u
+    for (i in 0 until BOARD_SIZE) {
+      for (j in 0 until BOARD_SIZE) {
+        val pos = i * BOARD_SIZE + j
+        if (board[i][j] != null) {
+          first += (1u shl pos)
+          if (board[i][j] == Piece.WHITE) {
+            second += (1u shl pos)
+          }
+        }
+      }
+    }
+    hash = Pair(first, second)
+  }
   fun pieceAt(pos: Position): Piece? = board[pos.rank.value][pos.file.value]
 
   /**
@@ -144,5 +169,12 @@ class Board(private val board: List<List<Piece?>>) {
     }
     sb.append("  A B C D E F G H  ")
     return sb.toString()
+  }
+
+  override fun hashCode(): Int = (hash.first + 31u * hash.second).toInt()
+
+  override fun equals(other: Any?): Boolean = when (other) {
+    is Board -> hash == other.hash
+    else -> false
   }
 }

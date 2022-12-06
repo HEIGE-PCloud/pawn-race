@@ -1,6 +1,6 @@
 package pawnrace
 
-class Game(val board: Board, val player: Player, val lastMove: Move? = null) {
+data class Game(val board: Board, val player: Player, val lastMove: Move? = null) {
 
   fun applyMove(move: Move): Game = Game(board.move(move), player.opponent!!, move)
 
