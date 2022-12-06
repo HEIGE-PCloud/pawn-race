@@ -21,4 +21,8 @@ class Player(val piece: Piece) {
 
   fun makeMove(game: Game): Move = getAllValidMoves(game).random()
 
+  override fun toString(): String {
+    return "Player $piece"
+  }
+
 }

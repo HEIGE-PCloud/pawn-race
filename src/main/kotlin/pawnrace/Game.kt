@@ -44,10 +44,8 @@ class Game(board: Board, val me: Player, val opponent: Player) {
     val move = Move(
       me.piece, pos, Position(
         pos.rank.value + me.piece.direction(),
-        if (isLeft)
-          pos.file.value - me.piece.direction()
-        else
-          pos.file.value + me.piece.direction()
+        if (isLeft) pos.file.value - me.piece.direction()
+        else pos.file.value + me.piece.direction()
       ), type
     )
     return if (board.isValidMove(move, historyMoves.lastOrNull())) move else null
@@ -55,20 +53,8 @@ class Game(board: Board, val me: Player, val opponent: Player) {
 
   private fun isPromoted(): Piece? {
     for (i in 0 until BOARD_SIZE) {
-      if (board.pieceAt(
-          Position(
-            BOARD_SIZE - 1,
-            i
-          )
-        ) == Piece.WHITE
-      ) return Piece.WHITE
-      if (board.pieceAt(
-          Position(
-            BOARD_SIZE - 1,
-            i
-          )
-        ) == Piece.BLACK
-      ) return Piece.BLACK
+      if (board.pieceAt(Position(BOARD_SIZE - 1, i)) == Piece.WHITE) return Piece.WHITE
+      if (board.pieceAt(Position(BOARD_SIZE - 1, i)) == Piece.BLACK) return Piece.BLACK
     }
     return null
   }
@@ -128,7 +114,7 @@ class Game(board: Board, val me: Player, val opponent: Player) {
           if (board.isValidMove(moveCapture)) {
             return moveCapture
           }
-          if (board.isValidMove(moveEnPassant)) {
+          if (board.isValidMove(moveEnPassant, historyMoves.lastOrNull())) {
             return moveEnPassant
           }
         }

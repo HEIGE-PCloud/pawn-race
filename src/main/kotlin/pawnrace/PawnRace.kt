@@ -3,6 +3,7 @@ package pawnrace
 import java.io.PrintWriter
 import java.io.InputStreamReader
 import java.io.BufferedReader
+import java.lang.Exception
 
 // You should not add any more member values or member functions to this class
 // (or change its name!). The auto-runner will load it in via reflection, and it
@@ -40,7 +41,7 @@ class PawnRace {
     if (me.piece == Piece.WHITE) {
       val move = me.makeMove(game)
       game.applyMove(move)
-      println(move)
+      output.println(move)
     }
     // After point, you may create a loop which waits to receive the other players move
     // (via input.readLine()), updates the state, checks for game over and, if not, decides
@@ -58,16 +59,16 @@ class PawnRace {
     */
     while (true) {
       val opponentMoveString: String = input.readLine()
-      println("[INFO] Received opponent's move $opponentMoveString")
-
       val opponentMove = game.parseMove(opponent.piece, opponentMoveString)
+      if (opponentMove == null) {
+        println("cannot parse opponent move $opponentMoveString")
+        throw Exception()
+      }
       game.applyMove(opponentMove!!)
-      println(game.board)
       if (game.over()) break
       val move: Move = me.makeMove(game)
-      println(move)
+      output.println(move)
       game.applyMove(move)
-      println(game.board)
       if (game.over()) break
     }
 
