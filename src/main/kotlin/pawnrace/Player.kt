@@ -1,6 +1,6 @@
 package pawnrace
 
-class Player(val piece: Piece) {
+class Player(val piece: Piece, var opponent: Player? = null) {
   fun getAllPawns(board: Board): List<Position> = board.positionsOf(piece)
   private fun getAllValidMoves(game: Game): List<Move> = game.moves(piece)
 
