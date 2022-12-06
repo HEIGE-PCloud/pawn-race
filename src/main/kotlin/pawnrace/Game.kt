@@ -50,7 +50,8 @@ data class Game(val board: Board, val player: Player, val lastMove: Move? = null
     if (isPromoted() != null) return true
     val blackMoves = moves(Piece.BLACK)
     val whiteMoves = moves(Piece.WHITE)
-    if (blackMoves.isEmpty() || whiteMoves.isEmpty()) return true
+    if (player.piece == Piece.BLACK && blackMoves.isEmpty()) return true
+    if (player.piece == Piece.WHITE && whiteMoves.isEmpty()) return true
     return false
   }
 

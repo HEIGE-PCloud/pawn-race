@@ -1,13 +1,16 @@
 package pawnrace
 
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ExecutorService
 import kotlin.math.abs
 import kotlin.math.max
+
 
 class Player(val piece: Piece, var opponent: Player? = null) {
   private val evaluateCache: ConcurrentHashMap<Game, Int> = ConcurrentHashMap()
   private fun getAllPawns(board: Board): List<Position> = board.positionsOf(piece)
-  private fun getAllValidMoves(game: Game): List<Move> = game.moves(piece)
+  private fun getAllValidMoves(game: Game): List<Move> = game.moves(piece).sortedByDescending { it.type.ordinal }
+
 
   /**
    * Return 0 if the pawn is not a passed pawn
@@ -40,15 +43,16 @@ class Player(val piece: Piece, var opponent: Player? = null) {
 
     val moves = getAllValidMoves(game)
     val value = moves.fold(0) { acc, move ->
-      var score = move.distance() // 1 or 2
+      var score = move.distance() * 2 // 1 or 2
+      if (move.to.rank.value == piece.promotionRank()) score += 10000
       // if capture +5
       if (move.type != MoveType.PEACEFUL) {
-        score += 5
+        score += 10
       }
       val pass = passedPawn(game.board, move.to)
       // if it is a passed pawn, add score
       if (pass > 0) {
-        score += BOARD_SIZE - pass
+        score += (BOARD_SIZE - pass) * 5
       }
       // finally, add score if a pawn chain is formed
       if (game.board.pieceAt(move.to.leftBack()) == piece) {
@@ -101,7 +105,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
   }
 
   private fun negaMax(game: Game, depth: Int): Int {
-    if (depth == 0) return evaluate(game)
+    if (depth == 0) evaluate(game)
     var maxScore = Int.MIN_VALUE
     val allMoves = getAllValidMoves(game)
     for (move in allMoves) {
@@ -110,16 +114,28 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     return maxScore
   }
 
-//  private fun randomMove(game: Game): Move = getAllValidMoves(game).random()
-  fun makeMove(game: Game): Move {
-    //Runtime.getRuntime().availableProcessors()/2 - 1
+
+  //  private fun randomMove(game: Game): Move = getAllValidMoves(game).random()
+  fun makeMove(game: Game, executorService: ExecutorService): Move {
+
+    val MAX_DEPTH = 8
     val moves = getAllValidMoves(game)
     val games = moves.map { game.applyMove(it) }
-    val scores = games.map { negaMax(it, 8) }
-    val maxScore = scores.max()
-    val maxIndex = scores.indexOf(maxScore)
+    var maxScore = 0
+    var maxIndex = 0
+    for (depth in 1..MAX_DEPTH) {
+      val scores = games.map { negaMax(it, depth) }
+//      val futureScores = games.map { executorService.submit(negaMax(it, depth)) }
+//      val scores = futureScores.map { it.get() }
+      val maxDepthScore = scores.max()
+      if (maxDepthScore > maxScore) {
+        maxScore = maxDepthScore
+        maxIndex = scores.indexOf(maxScore)
+      }
+    }
     return moves[maxIndex]
   }
+
   override fun toString(): String {
     return "Player $piece"
   }

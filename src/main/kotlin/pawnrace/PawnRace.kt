@@ -3,6 +3,7 @@ package pawnrace
 import java.io.PrintWriter
 import java.io.InputStreamReader
 import java.io.BufferedReader
+import java.util.concurrent.Executors
 
 // You should not add any more member values or member functions to this class
 // (or change its name!). The auto-runner will load it in via reflection, and it
@@ -12,6 +13,8 @@ class PawnRace {
   // Don't edit the type or the name of this method
   // The colour can take one of two values: 'W' or 'B', this indicates your player colour
   fun playGame(colour: Char, output: PrintWriter, input: BufferedReader) {
+    val threadCount = Runtime.getRuntime().availableProcessors() / 2 - 1
+    val executorService = Executors.newFixedThreadPool(threadCount - 1)
     // init players
     val me = Player(Piece(colour))
     val opponent = Player(Piece(colour).opposite())
@@ -38,14 +41,17 @@ class PawnRace {
     // Initialise the board state
     val board = Board(File(gaps[0]), File(gaps[1]))
     var game = Game(board, me)
+
+//    println(game.board)
     // If you are the white player, you are now allowed to move
     // you may send your move, once you have decided what it will be, with output.println(move)
     // for example: output.println("axb4")
     // White player should decide what move to make and send it
     if (me.piece == Piece.WHITE) {
-      val move = me.makeMove(game)
+      val move = me.makeMove(game, executorService)
       game = game.applyMove(move)
       output.println(move)
+//      println(game.board)
     }
     // After point, you may create a loop which waits to receive the other players move
     // (via input.readLine()), updates the state, checks for game over and, if not, decides
@@ -65,16 +71,19 @@ class PawnRace {
       val opponentMoveString: String = input.readLine()
       val opponentMove = game.parseMove(opponent.piece, opponentMoveString)
       game = game.applyMove(opponentMove!!)
+//      println(game.board)
       if (game.over()) break
-      val move: Move = me.makeMove(game)
+      val move: Move = me.makeMove(game, executorService)
       output.println(move)
       game = game.applyMove(move)
+//      println(game.board)
       if (game.over()) break
     }
 
     // Once the loop is over, the game has finished and you may wish to print who has won
     // If your advanced AI has used any files, make sure you close them now!
     // tidy up resources, if any
+    executorService.shutdown()
   }
 }
 
