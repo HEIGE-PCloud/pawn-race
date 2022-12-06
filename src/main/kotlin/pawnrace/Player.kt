@@ -2,46 +2,7 @@ package pawnrace
 
 class Player(val piece: Piece) {
   fun getAllPawns(board: Board): List<Position> = board.positionsOf(piece)
-  fun getAllValidMoves(board: Board): List<Move> = getAllPawns(board).flatMap { pos ->
-    listOf(
-      Move(
-        piece,
-        pos,
-        Position(pos.rank.value + piece.direction(), pos.file.value),
-        MoveType.PEACEFUL
-      ),
-      Move(
-        piece,
-        pos,
-        Position(pos.rank.value + 2 * piece.direction(), pos.file.value),
-        MoveType.PEACEFUL
-      ),
-      Move(
-        piece,
-        pos,
-        Position(pos.rank.value + piece.direction(), pos.file.value - 1),
-        MoveType.CAPTURE
-      ),
-      Move(
-        piece,
-        pos,
-        Position(pos.rank.value + piece.direction(), pos.file.value + 1),
-        MoveType.CAPTURE
-      ),
-      Move(
-        piece,
-        pos,
-        Position(pos.rank.value + piece.direction(), pos.file.value - 1),
-        MoveType.EN_PASSANT
-      ),
-      Move(
-        piece,
-        pos,
-        Position(pos.rank.value + piece.direction(), pos.file.value - 1),
-        MoveType.EN_PASSANT
-      )
-    ).filter { board.isValidMove(it) }
-  }
+  private fun getAllValidMoves(game: Game): List<Move> = game.moves(piece)
 
   fun isPassedPawn(board: Board, pos: Position): Boolean {
     if (board.pieceAt(pos) != piece) return false
@@ -58,6 +19,6 @@ class Player(val piece: Piece) {
     return true
   }
 
-  fun makeMove(game: Game): Move = getAllValidMoves(game.board).random()
+  fun makeMove(game: Game): Move = getAllValidMoves(game).random()
 
 }

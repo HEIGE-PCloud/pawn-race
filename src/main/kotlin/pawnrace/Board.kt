@@ -146,9 +146,3 @@ class Board(private val board: List<List<Piece?>>) {
     return sb.toString()
   }
 }
-
-
-fun main() {
-  val board = Board(File(0), File(0))
-  println(board)
-}

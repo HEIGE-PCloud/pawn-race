@@ -251,7 +251,6 @@ class BoardTest {
     val move4 = Move(Piece.BLACK, Position("c7"), Position("c5"), MoveType.PEACEFUL)
     assertEquals(true, board33.isValidMove(move4))
     val board34 = board33.move(move4)
-    println(board34)
     val move5 = Move(Piece.WHITE, Position("b5"), Position("c6"), MoveType.EN_PASSANT)
     assertEquals(true, board34.isValidMove(move5, move4))
   }

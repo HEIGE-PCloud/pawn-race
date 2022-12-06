@@ -18,7 +18,7 @@ class PawnRace {
     // TODO: Send gaps with output.println()
     val me = Player(Piece(colour))
     val opponent = Player(Piece(colour).opposite())
-    if (me.piece == Piece.WHITE) {
+    if (me.piece == Piece.BLACK) {
       output.println("AH")
     }
 
@@ -32,6 +32,7 @@ class PawnRace {
     // TODO: Initialise the board state
     val board = Board(File(gaps[0]), File(gaps[1]))
     val game = Game(board, me, opponent)
+    println(board)
     // If you are the white player, you are now allowed to move
     // you may send your move, once you have decided what it will be, with output.println(move)
     // for example: output.println("axb4")
@@ -58,11 +59,14 @@ class PawnRace {
     while (true) {
       val opponentMoveString: String = input.readLine()
       val opponentMove = game.parseMove(opponent.piece, opponentMoveString)
+      println("[INFO] Received opponent's move $opponentMove")
       game.applyMove(opponentMove)
+      println(game.board)
       if (game.over()) break
-      val move = me.makeMove(game)
+      val move: Move = me.makeMove(game)
       println(move)
       game.applyMove(move)
+      println(game.board)
       if (game.over()) break
     }
 

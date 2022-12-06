@@ -35,7 +35,7 @@ class Game(board: Board, val me: Player, val opponent: Player) {
         pos.rank.value + me.piece.direction() * step, pos.file.value
       ), MoveType.PEACEFUL
     )
-    return if (board.isValidMove(move, historyMoves.last())) move else null
+    return if (board.isValidMove(move, historyMoves.lastOrNull())) move else null
   }
 
   private fun moveDiagonalBy(
@@ -50,7 +50,7 @@ class Game(board: Board, val me: Player, val opponent: Player) {
           pos.file.value + me.piece.direction()
       ), type
     )
-    return if (board.isValidMove(move, historyMoves.last())) move else null
+    return if (board.isValidMove(move, historyMoves.lastOrNull())) move else null
   }
 
   private fun isPromoted(): Piece? {
