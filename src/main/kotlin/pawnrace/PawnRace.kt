@@ -3,7 +3,6 @@ package pawnrace
 import java.io.PrintWriter
 import java.io.InputStreamReader
 import java.io.BufferedReader
-import java.lang.Exception
 
 // You should not add any more member values or member functions to this class
 // (or change its name!). The auto-runner will load it in via reflection, and it
@@ -38,14 +37,14 @@ class PawnRace {
     // Now you may construct your initial board
     // Initialise the board state
     val board = Board(File(gaps[0]), File(gaps[1]))
-    val game = Game(board, me)
+    var game = Game(board, me)
     // If you are the white player, you are now allowed to move
     // you may send your move, once you have decided what it will be, with output.println(move)
     // for example: output.println("axb4")
     // White player should decide what move to make and send it
     if (me.piece == Piece.WHITE) {
       val move = me.makeMove(game)
-      game.applyMove(move)
+      game = game.applyMove(move)
       output.println(move)
     }
     // After point, you may create a loop which waits to receive the other players move
@@ -65,11 +64,11 @@ class PawnRace {
     while (true) {
       val opponentMoveString: String = input.readLine()
       val opponentMove = game.parseMove(opponent.piece, opponentMoveString)
-      game.applyMove(opponentMove!!)
+      game = game.applyMove(opponentMove!!)
       if (game.over()) break
       val move: Move = me.makeMove(game)
       output.println(move)
-      game.applyMove(move)
+      game = game.applyMove(move)
       if (game.over()) break
     }
 
