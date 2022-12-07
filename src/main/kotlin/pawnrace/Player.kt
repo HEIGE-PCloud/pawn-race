@@ -5,15 +5,20 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 
 
 // Use a much smaller INT_MAX to avoid overflow
 const val INT_MAX = 100000000
 const val INT_MIN = -100000000
+const val EXACT = 0
+const val LOWERBOUND = 1
+const val UPPERBOUND = 2
 
 class Player(val piece: Piece, var opponent: Player? = null) {
   private var run = true
-  private val evaluateCache: ConcurrentHashMap<Game, Int> = ConcurrentHashMap()
+  // map a game to (depth, flag, value)
+  private val transpositionTable: ConcurrentHashMap<Game, Triple<Int, Int, Int>> = ConcurrentHashMap()
   private fun getAllPawns(board: Board): List<Position> = board.positionsOf(piece)
 
   /**
@@ -48,8 +53,6 @@ class Player(val piece: Piece, var opponent: Player? = null) {
   }
 
   private fun evaluate(game: Game): Int {
-    val cache = evaluateCache[game]
-    if (cache != null) return cache
     val positions = getAllPawns(game.board)
     if (positions.find { it.rank.value == piece.promotionRank() } != null) return 1000000000
     val moves = getAllValidMoves(game)
@@ -69,7 +72,6 @@ class Player(val piece: Piece, var opponent: Player? = null) {
       }
       acc + score
     }
-    evaluateCache[game] = value
     return value
   }
 
@@ -95,7 +97,27 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     return alpha
   }
 
-  private fun negamax(game: Game, depth: Int, a: Int, beta: Int): Int {
+  private fun negamax(game: Game, depth: Int, a: Int, b: Int): Int {
+    var alpha = a
+    var beta = b
+
+    val entry = transpositionTable[game]
+    if (entry != null) {
+      val (enDepth, enFlag, enValue) = entry
+      if (enDepth >= depth) {
+        if (enFlag == EXACT) {
+          return enValue
+        } else if (enFlag == LOWERBOUND) {
+          alpha = max(alpha, enValue)
+        } else if (enFlag == UPPERBOUND) {
+          beta = min(beta, enValue)
+        }
+      }
+      if (alpha >= beta) {
+        return enValue
+      }
+    }
+
     if (depth == 0) {
       return quiesce(game, a, beta)
     }
@@ -107,7 +129,6 @@ class Player(val piece: Piece, var opponent: Player? = null) {
       }
     }
     val games = getAllValidMoves(game).map { game.applyMove(it) }
-    var alpha = a
     var value = INT_MIN
     for (nextGame in games) {
       if (!run) break
@@ -115,8 +136,17 @@ class Player(val piece: Piece, var opponent: Player? = null) {
       alpha = max(alpha, value)
       if (alpha >= beta) break
     }
-    return value
 
+    val enFlag: Int
+    if (value <= a) {
+      enFlag = UPPERBOUND
+    } else if (value >= beta) {
+      enFlag = LOWERBOUND
+    } else {
+      enFlag = EXACT
+    }
+    transpositionTable[game] = Triple(depth, enFlag, value)
+    return value
   }
 
   private fun randomMove(game: Game): Move = getAllValidMoves(game).random()
