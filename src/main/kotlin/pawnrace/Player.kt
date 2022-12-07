@@ -91,7 +91,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     if (game.over()) {
       // lower depth -> win/lose sooner -> is better/worse
       val score = (100 - depth) * 10000
-      return when (game.winner()) {
+      return colour * when (game.winner()) {
         null -> 0
         this -> score
         else -> -score
@@ -120,7 +120,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
   private fun randomMove(game: Game): Move = getAllValidMoves(game).random()
 
   fun makeMove(game: Game, executor: ExecutorService): Move {
-    val maxDepth = 50
+    val maxDepth = 40
     val moves = getAllValidMoves(game)
     val bestScore = AtomicInteger(INT_MIN)
     val bestMove: AtomicReference<Move?> = AtomicReference(null)
@@ -136,9 +136,9 @@ class Player(val piece: Piece, var opponent: Player? = null) {
             bestMove.set(currentMove)
           }
           if (runningMove.get() == runMove) {
-            println("[DEBUG] Search depth $depth with move $currentMove completed, score $score, bestScore ${bestScore.get()}," +
-              " " +
-              "bestMove ${bestMove.get()}")
+//            println("[DEBUG] Search depth $depth with move $currentMove completed, score $score, bestScore ${bestScore.get()}," +
+//              " " +
+//              "bestMove ${bestMove.get()}")
             maxSearchDepth = max(maxSearchDepth, depth)
 
           }
