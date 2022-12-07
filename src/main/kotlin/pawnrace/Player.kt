@@ -50,6 +50,8 @@ class Player(val piece: Piece, var opponent: Player? = null) {
   private fun evaluate(game: Game): Int {
     val cache = evaluateCache[game]
     if (cache != null) return cache
+    val positions = getAllPawns(game.board)
+    if (positions.find { it.rank.value == piece.promotionRank() } != null) return 1000000000
     val moves = getAllValidMoves(game)
     val value = moves.fold(0) { acc, move ->
       var score = move.distance() * 2 // 1 or 2
@@ -65,18 +67,6 @@ class Player(val piece: Piece, var opponent: Player? = null) {
       if (pass > 0) {
         score += (BOARD_SIZE - pass) * 5
       }
-      // finally, add score if a pawn chain is formed
-      if (game.board.pieceAt(move.to.leftBack()) == piece) {
-        score += 2
-      } else if (game.board.pieceAt(move.to.leftFront()) == piece) {
-        score += 2
-      }
-      if (game.board.pieceAt(move.to.rightBack()) == piece) {
-        score += 2
-      } else if (game.board.pieceAt(move.to.rightFront()) == piece) {
-        score += 2
-      }
-
       acc + score
     }
     evaluateCache[game] = value
@@ -88,16 +78,15 @@ class Player(val piece: Piece, var opponent: Player? = null) {
    */
   private fun quiesce(game: Game, a: Int, beta: Int): Int {
     var alpha = a
-    val standPat = evaluate(game)
-    if (standPat >= beta)
+    val eva = evaluate(game)
+    if (eva >= beta)
       return beta
-    if (alpha < standPat)
-      alpha = standPat
+    if (alpha < eva)
+      alpha = eva
     val captures = getAllValidMoves(game).filter { it.type == MoveType.CAPTURE || it.type == MoveType.EN_PASSANT }
     for (capture in captures) {
       if (!run) break
-      val nextGame = game.applyMove(capture)
-      val score = -quiesce(nextGame, -beta, -alpha)
+      val score = -quiesce(game.applyMove(capture), -beta, -alpha)
       if (score >= beta)
         return beta
       if (score > alpha)
@@ -106,18 +95,28 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     return alpha
   }
 
-  private fun alphaBeta(game: Game, a: Int, beta: Int, depth: Int): Int {
-    var alpha = a
-    if (depth == 0) return quiesce(game, alpha, beta)
-    val moves = getAllValidMoves(game)
-    for (move in moves) {
-      if (!run) break
-      val score = -alphaBeta(game, -beta, -alpha, depth - 1)
-      if (score >= beta)
-        return beta
-      alpha = max(alpha, score)
+  private fun negamax(game: Game, depth: Int, a: Int, beta: Int): Int {
+    if (depth == 0) {
+      return quiesce(game, a, beta)
     }
-    return alpha
+    if (game.over()) {
+      return when (game.winner()) {
+        null -> 0
+        this -> 10000
+        else -> -10000
+      }
+    }
+    val games = getAllValidMoves(game).map { game.applyMove(it) }
+    var alpha = a
+    var value = INT_MIN
+    for (nextGame in games) {
+      if (!run) break
+      value = max(value, -negamax(nextGame, depth - 1, -beta, -alpha))
+      alpha = max(alpha, value)
+      if (alpha >= beta) break
+    }
+    return value
+
   }
 
   private fun randomMove(game: Game): Move = getAllValidMoves(game).random()
@@ -129,23 +128,25 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     val bestScore = AtomicInteger(INT_MIN)
     val bestMove: AtomicReference<Move?> = AtomicReference(null)
     run = true
+    var maxSearchDepth = 0
     for (depth in 1..maxDepth) {
       for (i in moves.indices) {
         val currentMove = moves[i]
         val currentGame = games[i]
         executor.submit {
-          val score = alphaBeta(currentGame, INT_MIN, INT_MAX, depth)
+          val score = negamax(currentGame, INT_MIN, INT_MAX, depth)
           if (score > bestScore.get()) {
             bestScore.set(score)
             bestMove.set(currentMove)
           }
+          if (run) maxSearchDepth = max(maxSearchDepth, depth)
         }
       }
     }
     if (!executor.awaitTermination(4500, TimeUnit.MILLISECONDS)) {
       run = false
     }
-
+    println("[INFO] Search Depth $maxSearchDepth")
     return bestMove.get() ?: randomMove(game)
   }
 

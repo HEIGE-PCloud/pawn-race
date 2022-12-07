@@ -15,8 +15,9 @@ class PawnRace {
   fun playGame(colour: Char, output: PrintWriter, input: BufferedReader) {
     // init players
     val threadCount = Runtime.getRuntime().availableProcessors() / 2 - 1
-    val executor = Executors.newFixedThreadPool(threadCount - Thread.activeCount())
-    println("[INFO] Available thread count ${threadCount - Thread.activeCount()}")
+    val availableThreadCount = threadCount - Thread.activeCount()
+    val executor = Executors.newFixedThreadPool(availableThreadCount)
+    println("[INFO] Available thread count $availableThreadCount}")
     val me = Player(Piece(colour))
     val opponent = Player(Piece(colour).opposite())
     me.opponent = opponent
