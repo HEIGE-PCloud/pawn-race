@@ -36,7 +36,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
    * Return a positive integer n if it is
    * the n is the distance it has travelled
    */
-  fun passedPawn(board: Board, pos: Position, piece: Piece): Int {
+  private fun passedPawn(board: Board, pos: Position, piece: Piece): Int {
     if (board.pieceAt(pos) != piece) return 0
     val direction = piece.direction()
     val startRank = pos.rank.value + direction
@@ -68,8 +68,6 @@ class Player(val piece: Piece, var opponent: Player? = null) {
         distanceFromStart(pos, opponent!!.piece) +
         5 * passedPawn(game.board, pos, opponent!!.piece)
     }
-    println("My score $myScore")
-    println("Opponent score $opponentScore")
     return myScore - opponentScore
   }
 
@@ -101,7 +99,11 @@ class Player(val piece: Piece, var opponent: Player? = null) {
         else -> -score
       }
     }
-    val games = getAllValidMoves(game).map { game.applyMove(it) }
+    val games = if (colour == -1)
+      getAllValidMoves(game).map { game.applyMove(it) }
+    else opponent!!.getAllValidMoves(game)
+      .map { game.applyMove(it) }
+
     var value = INT_MIN
     for (nextGame in games) {
       if (runningMove.get() != runMove) return 0
@@ -128,23 +130,31 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     val moves = getAllValidMoves(game)
     val bestScore = AtomicInteger(INT_MIN)
     val bestMove: AtomicReference<Move?> = AtomicReference(null)
-    var maxSearchDepth = 0
+    val depthBestScore = AtomicInteger(INT_MIN)
+    val depthBestMove: AtomicReference<Move?> = AtomicReference(null)
+    val maxSearchDepth = AtomicInteger(0)
     for (depth in 0..maxDepth) {
       for (currentMove in moves) {
         val currentGame = game.applyMove(currentMove)
         val runMove = runningMove.get()
         executor.submit {
           val score = negamax(currentGame, depth, INT_MIN, INT_MAX, 1, runMove)
-          if (runMove == runningMove.get() && score > bestScore.get()) {
-            bestScore.set(score)
-            bestMove.set(currentMove)
-          }
-          if (runningMove.get() == runMove) {
-//            println("[DEBUG] Search depth $depth with move $currentMove completed, score $score, bestScore ${bestScore.get()}," +
-//              " " +
-//              "bestMove ${bestMove.get()}")
-            maxSearchDepth = max(maxSearchDepth, depth)
-
+          if (runMove == runningMove.get()) {
+            if (depth == maxSearchDepth.get() && score > depthBestScore.get()) {
+              depthBestScore.set(score)
+              depthBestMove.set(currentMove)
+            } else if (depth > maxSearchDepth.get()) {
+              maxSearchDepth.set(depth)
+              bestScore.set(depthBestScore.get())
+              bestMove.set(depthBestMove.get())
+              depthBestMove.set(currentMove)
+              depthBestScore.set(score)
+            }
+//            println(
+//              "[DEBUG] Search depth $depth with move $currentMove completed, score $score, bestScore ${bestScore.get()}," +
+//                " " +
+//                "bestMove ${bestMove.get()}"
+//            )
           }
         }
       }
