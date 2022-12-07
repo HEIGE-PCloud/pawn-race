@@ -36,7 +36,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
    * Return a positive integer n if it is
    * the n is the distance it has travelled
    */
-  private fun passedPawn(board: Board, pos: Position, piece: Piece): Int {
+  fun passedPawn(board: Board, pos: Position, piece: Piece): Int {
     if (board.pieceAt(pos) != piece) return 0
     val direction = piece.direction()
     val startRank = pos.rank.value + direction
@@ -55,18 +55,22 @@ class Player(val piece: Piece, var opponent: Player? = null) {
 
   private fun distanceFromStart(pos: Position, piece: Piece): Int = abs(pos.rank.value - piece.startingRank())
 
-  private fun evaluate(game: Game): Int {
+  fun evaluate(game: Game): Int {
     val myPoss = getAllPawns(game.board)
     val oppoPoss = opponent!!.getAllPawns(game.board)
-    return myPoss.fold(0) { acc, pos ->
+    val myScore = myPoss.fold(0) { acc, pos ->
       acc +
         distanceFromStart(pos, piece) +
         5 * passedPawn(game.board, pos, piece)
-    } - oppoPoss.fold(0) { acc, pos ->
+    }
+    val opponentScore = oppoPoss.fold(0) { acc, pos ->
       acc +
-        distanceFromStart(pos, piece) +
+        distanceFromStart(pos, opponent!!.piece) +
         5 * passedPawn(game.board, pos, opponent!!.piece)
     }
+    println("My score $myScore")
+    println("Opponent score $opponentScore")
+    return myScore - opponentScore
   }
 
   private fun negamax(game: Game, depth: Int, a: Int, b: Int, colour: Int, runMove: Int): Int {

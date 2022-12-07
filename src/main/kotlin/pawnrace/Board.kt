@@ -19,6 +19,7 @@ class Board(private val board: List<List<Piece?>>) {
    * each hash uniquely determins a board
    */
   private val hash: Pair<ULong, ULong>
+
   constructor(whiteGap: File, blackGap: File) : this(List(BOARD_SIZE) { i ->
     when (i) {
       WHITE_START_RANK -> List(BOARD_SIZE) { j ->
@@ -39,6 +40,19 @@ class Board(private val board: List<List<Piece?>>) {
     }
   })
 
+  constructor(rowStrings: Array<String>) : this(rowStrings.reversed().map { rowString ->
+    rowString.toList().map {
+      when (it) {
+        '.' -> null
+        'w' -> Piece.WHITE
+        'b' -> Piece.BLACK
+        'W' -> Piece.WHITE
+        'B' -> Piece.BLACK
+        else -> null
+      }
+    }
+  })
+
   init {
     var first: ULong = 0u
     var second: ULong = 0u
@@ -55,6 +69,7 @@ class Board(private val board: List<List<Piece?>>) {
     }
     hash = Pair(first, second)
   }
+
   fun pieceAt(pos: Position?): Piece? = when (pos) {
     null -> null
     else -> board[pos.rank.value][pos.file.value]
