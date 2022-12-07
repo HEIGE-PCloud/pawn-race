@@ -28,7 +28,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
    * a capture move with high rank value should be a better move
    */
   private fun getAllValidMoves(game: Game): List<Move> =
-    game.moves(piece).sortedByDescending { it.type.ordinal + (piece.direction()) * it.to.rank.value }
+    game.moves(piece).sortedByDescending { it.type.ordinal * 10 + (piece.direction()) * it.to.rank.value }
 
 
   /**
