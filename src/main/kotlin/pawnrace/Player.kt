@@ -113,8 +113,8 @@ class Player(val piece: Piece, var opponent: Player? = null) {
       val score = 10000
       return colour * when (game.winner()?.piece) {
         null -> 0
-        piece -> -score
-        else -> score
+        piece -> score
+        else -> -score
       }
     }
 
@@ -159,7 +159,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
         val currentGame = game.applyMove(currentMove)
         val runMove = runningMove.get()
         executor.submit {
-          val score = -negamax(currentGame, depth, INT_MAX, INT_MIN, -1, runMove)
+          val score = -negamax(currentGame, depth, INT_MIN, INT_MAX, -1, runMove)
           if (runMove == runningMove.get()) {
             if (depth == maxSearchDepth.get() && score > depthBestScore.get()) {
               depthBestScore.set(score)
