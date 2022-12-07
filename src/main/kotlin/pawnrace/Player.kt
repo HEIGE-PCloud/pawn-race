@@ -54,50 +54,12 @@ class Player(val piece: Piece, var opponent: Player? = null) {
 
   private fun evaluate(game: Game): Int {
     val positions = getAllPawns(game.board)
-    if (positions.find { it.rank.value == piece.promotionRank() } != null) return 1000000000
-    val moves = getAllValidMoves(game)
-    val value = moves.fold(0) { acc, move ->
-      var score = move.distance() * 2 // 1 or 2
-      if (move.to.rank.value == piece.promotionRank() ||
-        move.from.rank.value == piece.promotionRank()
-      ) score += 1000
-      // if capture +5
-      if (move.type != MoveType.PEACEFUL) {
-        score += 10
-      }
-      val pass = passedPawn(game.board, move.to)
-      // if it is a passed pawn, add score
-      if (pass > 0) {
-        score += (BOARD_SIZE - pass) * 5
-      }
-      acc + score
+    return positions.fold(0) { acc, pos ->
+      acc + abs(pos.rank.value - piece.startingRank()) + 5 * (BOARD_SIZE - passedPawn(game.board, pos))
     }
-    return value
   }
 
-  /**
-   * Use Quiescence Search to only evaluate quiet moves to avoid the horizon effect
-   */
-  private fun quiesce(game: Game, a: Int, beta: Int, runMove: Int): Int {
-    var alpha = a
-    val eva = evaluate(game)
-    if (eva >= beta)
-      return beta
-    if (alpha < eva)
-      alpha = eva
-    val captures = getAllValidMoves(game).filter { it.type == MoveType.CAPTURE || it.type == MoveType.EN_PASSANT }
-    for (capture in captures) {
-      if (runningMove.get() != runMove) break
-      val score = -quiesce(game.applyMove(capture), -beta, -alpha, runMove)
-      if (score >= beta)
-        return beta
-      if (score > alpha)
-        alpha = score
-    }
-    return alpha
-  }
-
-  private fun negamax(game: Game, depth: Int, a: Int, b: Int, runMove: Int): Int {
+  private fun negamax(game: Game, depth: Int, a: Int, b: Int, colour: Int, runMove: Int): Int {
     var alpha = a
     var beta = b
 
@@ -120,7 +82,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     }
 
     if (depth == 0) {
-      return quiesce(game, a, beta, runMove)
+      return colour * evaluate(game)
     }
     if (game.over()) {
       // lower depth is better
@@ -135,7 +97,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     var value = INT_MIN
     for (nextGame in games) {
       if (runningMove.get() != runMove) return 0
-      value = max(value, -negamax(nextGame, depth - 1, -beta, -alpha, runMove))
+      value = max(value, -negamax(nextGame, depth - 1, -beta, -alpha, -colour, runMove))
       alpha = max(alpha, value)
       if (alpha >= beta) break
     }
@@ -165,7 +127,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
         val currentGame = game.applyMove(currentMove)
         val runMove = runningMove.get()
         executor.submit {
-          val score = negamax(currentGame, depth, INT_MIN, INT_MAX, runMove)
+          val score = negamax(currentGame, depth, INT_MIN, INT_MAX, 1, runMove)
           if (runMove == runningMove.get() && score > bestScore.get()) {
             bestScore.set(score)
             bestMove.set(currentMove)
