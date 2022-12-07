@@ -108,17 +108,19 @@ class Player(val piece: Piece, var opponent: Player? = null) {
       if (alpha >= beta) return enValue
     }
 
-    if (depth == 0) return quiescence(game, alpha, beta, colour)
     if (game.over()) {
       // lower depth -> win/lose sooner -> is better/worse
       val score = 10000
-      return colour * when (game.winner()) {
+      return when (game.winner()?.piece) {
         null -> 0
-        this -> score
+        piece -> score
         else -> -score
       }
     }
-    val games = if (colour == -1)
+
+    if (depth == 0) return colour * evaluate(game)//quiescence(game, alpha, beta, colour)
+
+    val games = if (colour == 1)
       getAllValidMoves(game).map { game.applyMove(it) }
     else opponent!!.getAllValidMoves(game)
       .map { game.applyMove(it) }
@@ -145,7 +147,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
   private fun randomMove(game: Game): Move = getAllValidMoves(game).random()
 
   fun makeMove(game: Game, executor: ExecutorService): Move {
-    val maxDepth = 40
+    val maxDepth = 30
     val moves = getAllValidMoves(game)
     val bestScore = AtomicInteger(INT_MIN)
     val bestMove: AtomicReference<Move?> = AtomicReference(null)
@@ -157,7 +159,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
         val currentGame = game.applyMove(currentMove)
         val runMove = runningMove.get()
         executor.submit {
-          val score = negamax(currentGame, depth, INT_MIN, INT_MAX, 1, runMove)
+          val score = -negamax(currentGame, depth, INT_MAX, INT_MIN, -1, runMove)
           if (runMove == runningMove.get()) {
             if (depth == maxSearchDepth.get() && score > depthBestScore.get()) {
               depthBestScore.set(score)
@@ -180,6 +182,8 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     }
     Thread.sleep(4500)
     runningMove.set(runningMove.get() + 1)
+
+
 //    println("[DEBUG] runningMove has been updated to ${runningMove}")
     println("[INFO] Search Depth $maxSearchDepth")
     println("[INFO] Best move ${bestMove.get()}")
