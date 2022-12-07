@@ -13,6 +13,7 @@ class PawnRace {
   // Don't edit the type or the name of this method
   // The colour can take one of two values: 'W' or 'B', this indicates your player colour
   fun playGame(colour: Char, output: PrintWriter, input: BufferedReader) {
+    val timeLimit = 4900L // ms
     // init players
     val threadCount = Runtime.getRuntime().availableProcessors() / 2 - 1
     val availableThreadCount = threadCount - Thread.activeCount()
@@ -39,6 +40,7 @@ class PawnRace {
     // in the same form as above ("wb"), for example: "AH"
     // receive the confirmed gaps with input.readLine()
     val gaps = input.readLine()
+    val preStartTime = System.nanoTime() / 1000000
     println("[INFO] Actual opening gaps $gaps")
     // Now you may construct your initial board
     // Initialise the board state
@@ -51,7 +53,7 @@ class PawnRace {
     // for example: output.println("axb4")
     // White player should decide what move to make and send it
     if (me.piece == Piece.WHITE) {
-      val move = me.makeMove(game, executor)
+      val move = me.makeMove(game, executor,  preStartTime, timeLimit)
       game = game.applyMove(move)
       output.println(move)
       println("[INFO] My move is $move")
@@ -74,12 +76,13 @@ class PawnRace {
     */
     while (true) {
       val opponentMoveString: String = input.readLine()
+      val startTime = System.nanoTime() / 1000000
       val opponentMove = game.parseMove(opponent.piece, opponentMoveString)
       game = game.applyMove(opponentMove!!)
       println(game.board)
 
       if (game.over()) break
-      val move: Move = me.makeMove(game, executor)
+      val move: Move = me.makeMove(game, executor, startTime, timeLimit)
       output.println(move)
       game = game.applyMove(move)
 

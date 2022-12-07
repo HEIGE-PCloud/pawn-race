@@ -111,10 +111,10 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     if (game.over()) {
       // lower depth -> win/lose sooner -> is better/worse
       val score = 10000
-      return when (game.winner()?.piece) {
+      return colour * when (game.winner()?.piece) {
         null -> 0
-        piece -> score
-        else -> -score
+        piece -> -score
+        else -> score
       }
     }
 
@@ -146,7 +146,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
 
   private fun randomMove(game: Game): Move = getAllValidMoves(game).random()
 
-  fun makeMove(game: Game, executor: ExecutorService): Move {
+  fun makeMove(game: Game, executor: ExecutorService, startTime: Long, timeLimit: Long): Move {
     val maxDepth = 30
     val moves = getAllValidMoves(game)
     val bestScore = AtomicInteger(INT_MIN)
@@ -180,7 +180,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
         }
       }
     }
-    Thread.sleep(4500)
+    Thread.sleep(startTime + timeLimit - System.nanoTime() / 1000000)
     runningMove.set(runningMove.get() + 1)
 
 
