@@ -45,7 +45,6 @@ class PawnRace {
     val board = Board(File(gaps[0]), File(gaps[1]))
     var game = Game(board, me)
     println("[INFO] Game initialized")
-    println(game.board)
     // If you are the white player, you are now allowed to move
     // you may send your move, once you have decided what it will be, with output.println(move)
     // for example: output.println("axb4")
@@ -55,7 +54,6 @@ class PawnRace {
       game = game.applyMove(move)
       output.println(move)
       println("[INFO] My move is $move")
-      println(game.board)
 
     }
     // After point, you may create a loop which waits to receive the other players move
@@ -76,13 +74,11 @@ class PawnRace {
       val opponentMoveString: String = input.readLine()
       val opponentMove = game.parseMove(opponent.piece, opponentMoveString)
       game = game.applyMove(opponentMove!!)
-      println(game.board)
 
       if (game.over()) break
       val move: Move = me.makeMove(game, executor)
       output.println(move)
       game = game.applyMove(move)
-      println(game.board)
 
       println("[INFO] My move is $move")
       if (game.over()) break

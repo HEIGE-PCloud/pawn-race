@@ -1,7 +1,6 @@
 package pawnrace
 
 import java.util.concurrent.*
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.abs
@@ -17,7 +16,7 @@ const val LOWERBOUND = 1
 const val UPPERBOUND = 2
 
 class Player(val piece: Piece, var opponent: Player? = null) {
-  private var running = AtomicBoolean(true)
+  private var runningMove = AtomicInteger(0)
   // map a game to (depth, flag, value)
   private val transpositionTable: ConcurrentHashMap<Game, Triple<Int, Int, Int>> = ConcurrentHashMap()
   private fun getAllPawns(board: Board): List<Position> = board.positionsOf(piece)
@@ -79,7 +78,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
   /**
    * Use Quiescence Search to only evaluate quiet moves to avoid the horizon effect
    */
-  private fun quiesce(game: Game, a: Int, beta: Int): Int {
+  private fun quiesce(game: Game, a: Int, beta: Int, runMove: Int): Int {
     var alpha = a
     val eva = evaluate(game)
     if (eva >= beta)
@@ -88,8 +87,8 @@ class Player(val piece: Piece, var opponent: Player? = null) {
       alpha = eva
     val captures = getAllValidMoves(game).filter { it.type == MoveType.CAPTURE || it.type == MoveType.EN_PASSANT }
     for (capture in captures) {
-      if (!running.get()) break
-      val score = -quiesce(game.applyMove(capture), -beta, -alpha)
+      if (runningMove.get() != runMove) break
+      val score = -quiesce(game.applyMove(capture), -beta, -alpha, runMove)
       if (score >= beta)
         return beta
       if (score > alpha)
@@ -98,10 +97,11 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     return alpha
   }
 
-  private fun negamax(game: Game, depth: Int, a: Int, b: Int): Int {
+  private fun negamax(game: Game, depth: Int, a: Int, b: Int, runMove: Int): Int {
     var alpha = a
     var beta = b
 
+    if (runMove != runningMove.get()) return 0
     val entry = transpositionTable[game]
     if (entry != null) {
       val (enDepth, enFlag, enValue) = entry
@@ -120,7 +120,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     }
 
     if (depth == 0) {
-      return quiesce(game, a, beta)
+      return quiesce(game, a, beta, runMove)
     }
     if (game.over()) {
       // lower depth is better
@@ -134,8 +134,8 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     val games = getAllValidMoves(game).map { game.applyMove(it) }
     var value = INT_MIN
     for (nextGame in games) {
-      if (!running.get()) break
-      value = max(value, -negamax(nextGame, depth - 1, -beta, -alpha))
+      if (runningMove.get() != runMove) return 0
+      value = max(value, -negamax(nextGame, depth - 1, -beta, -alpha, runMove))
       alpha = max(alpha, value)
       if (alpha >= beta) break
     }
@@ -155,29 +155,35 @@ class Player(val piece: Piece, var opponent: Player? = null) {
   private fun randomMove(game: Game): Move = getAllValidMoves(game).random()
 
   fun makeMove(game: Game, executor: ExecutorService): Move {
-    val maxDepth = 1
+    val maxDepth = 50
     val moves = getAllValidMoves(game)
     val bestScore = AtomicInteger(INT_MIN)
     val bestMove: AtomicReference<Move?> = AtomicReference(null)
-    running.set(true)
     var maxSearchDepth = 0
     for (depth in 0..maxDepth) {
       for (currentMove in moves) {
         val currentGame = game.applyMove(currentMove)
+        val runMove = runningMove.get()
         executor.submit {
-          val score = negamax(currentGame, depth, INT_MIN, INT_MAX)
-          if (score > bestScore.get()) {
+          val score = negamax(currentGame, depth, INT_MIN, INT_MAX, runMove)
+          if (runMove == runningMove.get() && score > bestScore.get()) {
             bestScore.set(score)
             bestMove.set(currentMove)
           }
-          println("[INFO] Search depth $depth with move $currentMove completed, score $score, bestScore $bestScore")
-//          if (running.get()) maxSearchDepth = max(maxSearchDepth, depth)
+          if (runningMove.get() == runMove) {
+//            println("[DEBUG] RunningMove ${runningMove.get()} runMove ${runMove}")
+//            println("[DEBUG] Search depth $depth with move $currentMove completed, score $score, bestScore ${bestScore.get()}," +
+//              " " +
+//              "bestMove ${bestMove.get()}")
+            maxSearchDepth = max(maxSearchDepth, depth)
+
+          }
         }
       }
     }
-    if (!executor.awaitTermination(4500, TimeUnit.MILLISECONDS)) {
-      running.set(false)
-    }
+    Thread.sleep(4500)
+    runningMove.set(runningMove.get() + 1)
+//    println("[DEBUG] runningMove has been updated to ${runningMove}")
     println("[INFO] Search Depth $maxSearchDepth")
     println("[INFO] Best move ${bestMove.get()}")
     return bestMove.get() ?: randomMove(game)
