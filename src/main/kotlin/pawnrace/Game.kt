@@ -50,20 +50,18 @@ data class Game(val board: Board, val player: Player, val lastMove: Move? = null
     if (isPromoted() != null) return true
     val blackMoves = moves(Piece.BLACK)
     val whiteMoves = moves(Piece.WHITE)
-    if (player.piece == Piece.BLACK && blackMoves.isEmpty()) return true
-    if (player.piece == Piece.WHITE && whiteMoves.isEmpty()) return true
-    return false
+    return blackMoves.isEmpty() || whiteMoves.isEmpty()
   }
 
   fun winner(): Player? {
     val winnerPiece: Piece? = isPromoted()
     if (winnerPiece != null)
       return pieceToPlayer(winnerPiece)
-
-    val blackMoves = moves(Piece.BLACK)
-    val whiteMoves = moves(Piece.WHITE)
-    if (blackMoves.isEmpty() && whiteMoves.isEmpty()) return null
-    return if (blackMoves.isEmpty()) pieceToPlayer(Piece.WHITE) else pieceToPlayer(Piece.BLACK)
+    val blackPos = board.positionsOf(Piece.BLACK)
+    val whitePos = board.positionsOf(Piece.WHITE)
+    if (blackPos.isEmpty()) return pieceToPlayer(Piece.WHITE)
+    if (whitePos.isEmpty()) return pieceToPlayer(Piece.BLACK)
+    return null
   }
 
   fun parseMove(piece: Piece, moveString: String): Move? {
