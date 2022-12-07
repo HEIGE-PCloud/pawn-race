@@ -1,6 +1,7 @@
 package pawnrace
 
 import java.util.concurrent.*
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.abs
@@ -16,7 +17,7 @@ const val LOWERBOUND = 1
 const val UPPERBOUND = 2
 
 class Player(val piece: Piece, var opponent: Player? = null) {
-  private var run = true
+  private var running = AtomicBoolean(true)
   // map a game to (depth, flag, value)
   private val transpositionTable: ConcurrentHashMap<Game, Triple<Int, Int, Int>> = ConcurrentHashMap()
   private fun getAllPawns(board: Board): List<Position> = board.positionsOf(piece)
@@ -27,7 +28,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
    * a capture move with high rank value should be a better move
    */
   private fun getAllValidMoves(game: Game): List<Move> =
-    game.moves(piece).sortedByDescending { it.type.ordinal + it.to.rank.value }
+    game.moves(piece).sortedByDescending { it.type.ordinal + (piece.direction()) * it.to.rank.value }
 
 
   /**
@@ -87,7 +88,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
       alpha = eva
     val captures = getAllValidMoves(game).filter { it.type == MoveType.CAPTURE || it.type == MoveType.EN_PASSANT }
     for (capture in captures) {
-      if (!run) break
+      if (!running.get()) break
       val score = -quiesce(game.applyMove(capture), -beta, -alpha)
       if (score >= beta)
         return beta
@@ -122,16 +123,18 @@ class Player(val piece: Piece, var opponent: Player? = null) {
       return quiesce(game, a, beta)
     }
     if (game.over()) {
+      // lower depth is better
+      val score = (100 - depth) * 10000
       return when (game.winner()) {
         null -> 0
-        this -> 10000
-        else -> -10000
+        this -> score
+        else -> -score
       }
     }
     val games = getAllValidMoves(game).map { game.applyMove(it) }
     var value = INT_MIN
     for (nextGame in games) {
-      if (!run) break
+      if (!running.get()) break
       value = max(value, -negamax(nextGame, depth - 1, -beta, -alpha))
       alpha = max(alpha, value)
       if (alpha >= beta) break
@@ -152,31 +155,31 @@ class Player(val piece: Piece, var opponent: Player? = null) {
   private fun randomMove(game: Game): Move = getAllValidMoves(game).random()
 
   fun makeMove(game: Game, executor: ExecutorService): Move {
-    val maxDepth = 30
+    val maxDepth = 1
     val moves = getAllValidMoves(game)
-    val games = moves.map { game.applyMove(it) }
     val bestScore = AtomicInteger(INT_MIN)
     val bestMove: AtomicReference<Move?> = AtomicReference(null)
-    run = true
+    running.set(true)
     var maxSearchDepth = 0
-    for (depth in 1..maxDepth) {
-      for (i in moves.indices) {
-        val currentMove = moves[i]
-        val currentGame = games[i]
+    for (depth in 0..maxDepth) {
+      for (currentMove in moves) {
+        val currentGame = game.applyMove(currentMove)
         executor.submit {
-          val score = negamax(currentGame, INT_MIN, INT_MAX, depth)
+          val score = negamax(currentGame, depth, INT_MIN, INT_MAX)
           if (score > bestScore.get()) {
             bestScore.set(score)
             bestMove.set(currentMove)
           }
-          if (run) maxSearchDepth = max(maxSearchDepth, depth)
+          println("[INFO] Search depth $depth with move $currentMove completed, score $score, bestScore $bestScore")
+//          if (running.get()) maxSearchDepth = max(maxSearchDepth, depth)
         }
       }
     }
     if (!executor.awaitTermination(4500, TimeUnit.MILLISECONDS)) {
-      run = false
+      running.set(false)
     }
     println("[INFO] Search Depth $maxSearchDepth")
+    println("[INFO] Best move ${bestMove.get()}")
     return bestMove.get() ?: randomMove(game)
   }
 

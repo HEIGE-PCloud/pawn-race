@@ -16,8 +16,8 @@ class PawnRace {
     // init players
     val threadCount = Runtime.getRuntime().availableProcessors() / 2 - 1
     val availableThreadCount = threadCount - Thread.activeCount()
+    println("[INFO] Available thread count $availableThreadCount")
     val executor = Executors.newFixedThreadPool(availableThreadCount)
-    println("[INFO] Available thread count $availableThreadCount}")
     val me = Player(Piece(colour))
     val opponent = Player(Piece(colour).opposite())
     me.opponent = opponent
@@ -45,7 +45,7 @@ class PawnRace {
     val board = Board(File(gaps[0]), File(gaps[1]))
     var game = Game(board, me)
     println("[INFO] Game initialized")
-
+    println(game.board)
     // If you are the white player, you are now allowed to move
     // you may send your move, once you have decided what it will be, with output.println(move)
     // for example: output.println("axb4")
@@ -55,6 +55,8 @@ class PawnRace {
       game = game.applyMove(move)
       output.println(move)
       println("[INFO] My move is $move")
+      println(game.board)
+
     }
     // After point, you may create a loop which waits to receive the other players move
     // (via input.readLine()), updates the state, checks for game over and, if not, decides
@@ -74,10 +76,14 @@ class PawnRace {
       val opponentMoveString: String = input.readLine()
       val opponentMove = game.parseMove(opponent.piece, opponentMoveString)
       game = game.applyMove(opponentMove!!)
+      println(game.board)
+
       if (game.over()) break
       val move: Move = me.makeMove(game, executor)
       output.println(move)
       game = game.applyMove(move)
+      println(game.board)
+
       println("[INFO] My move is $move")
       if (game.over()) break
     }
@@ -85,7 +91,9 @@ class PawnRace {
     // Once the loop is over, the game has finished and you may wish to print who has won
     // If your advanced AI has used any files, make sure you close them now!
     // tidy up resources, if any
-    executor.shutdownNow()
+    while (!executor.isTerminated) {
+      executor.shutdownNow()
+    }
   }
 }
 
