@@ -71,6 +71,25 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     return myScore - opponentScore
   }
 
+  fun quiescence(game: Game, a: Int, b: Int, colour: Int): Int {
+    var alpha = a
+    val beta = b
+    var standPat = colour * evaluate(game)
+    alpha = max(alpha, standPat)
+
+    val moves = (if (colour == -1) game.moves(piece.opposite()) else game.moves(piece)).filter { it.type != MoveType
+      .PEACEFUL }
+    for (move in moves) {
+      val nextGame = game.applyMove(move)
+      val score = -quiescence(nextGame, -beta, -alpha, -colour)
+      standPat = max(standPat, score)
+      alpha = max(alpha, standPat)
+      if (alpha >= beta)
+        break
+    }
+    return standPat
+  }
+
   private fun negamax(game: Game, depth: Int, a: Int, b: Int, colour: Int, runMove: Int): Int {
     var alpha = a
     var beta = b
@@ -89,10 +108,10 @@ class Player(val piece: Piece, var opponent: Player? = null) {
       if (alpha >= beta) return enValue
     }
 
-    if (depth == 0) return colour * evaluate(game)
+    if (depth == 0) return quiescence(game, alpha, beta, colour)
     if (game.over()) {
       // lower depth -> win/lose sooner -> is better/worse
-      val score = (100 - depth) * 10000
+      val score = 10000
       return colour * when (game.winner()) {
         null -> 0
         this -> score
@@ -164,6 +183,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
 //    println("[DEBUG] runningMove has been updated to ${runningMove}")
     println("[INFO] Search Depth $maxSearchDepth")
     println("[INFO] Best move ${bestMove.get()}")
+    println("[INFO] Evaluation ${bestScore.get()}")
     return bestMove.get() ?: randomMove(game)
   }
 
