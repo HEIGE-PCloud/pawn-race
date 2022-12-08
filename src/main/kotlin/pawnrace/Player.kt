@@ -151,47 +151,37 @@ class Player(val piece: Piece, var opponent: Player? = null) {
   fun makeMove(game: Game, executor: ExecutorService, startTime: Long, timeLimit: Long): Move {
     val maxDepth = 30
     val moves = getAllValidMoves(game)
-    val bestScore = AtomicInteger(INT_MIN)
-    val bestMove: AtomicReference<Move?> = AtomicReference(null)
-    val depthBestScore = AtomicInteger(INT_MIN)
-    val depthBestMove: AtomicReference<Move?> = AtomicReference(null)
-    val maxSearchDepth = AtomicInteger(0)
+    val depthBestScores = List(maxDepth + 1) { AtomicInteger(INT_MIN) }
+    val depthBestMoves = List<AtomicReference<Move>>(maxDepth + 1) { AtomicReference(null) }
+    val depthSearchCount = List(maxDepth + 1) { AtomicInteger(0) }
     for (depth in 0..maxDepth) {
       for (currentMove in moves) {
         val currentGame = game.applyMove(currentMove)
         val runMove = runningMove.get()
         executor.submit {
           val score = -negamax(currentGame, depth, INT_MIN, INT_MAX, -1, runMove)
-          if (runMove == runningMove.get()) {
-            if (depth == maxSearchDepth.get() && score > depthBestScore.get()) {
-              depthBestScore.set(score)
-              depthBestMove.set(currentMove)
-            } else if (depth > maxSearchDepth.get()) {
-              maxSearchDepth.set(depth)
-              bestScore.set(depthBestScore.get())
-              bestMove.set(depthBestMove.get())
-              depthBestMove.set(currentMove)
-              depthBestScore.set(score)
-            }
-//            println(
-//              "[DEBUG] Search depth $depth with move $currentMove completed, score $score, bestScore ${bestScore.get()}," +
-//                " " +
-//                "bestMove ${bestMove.get()}"
-//            )
+          depthSearchCount[depth].incrementAndGet()
+          if (score > depthBestScores[depth].get()) {
+            depthBestScores[depth].set(score)
+            depthBestMoves[depth].set(currentMove)
           }
+//          println(
+//            "[DEBUG] Search depth $depth with move $currentMove completed, score $score, depthBestScore " +
+//              "${depthBestScores[depth]}," +
+//              " " +
+//              "depthBestMove ${depthBestMoves[depth]}"
+//          )
         }
       }
-      Thread.sleep(50)
     }
     Thread.sleep(startTime + timeLimit - System.nanoTime() / 1000000)
-    runningMove.set(runningMove.get() + 1)
-
-
-//    println("[DEBUG] runningMove has been updated to ${runningMove}")
-//    println("[INFO] Search Depth $maxSearchDepth")
-//    println("[INFO] Best move ${bestMove.get()}")
-//    println("[INFO] Evaluation ${bestScore.get()}")
-    return bestMove.get() ?: randomMove(game)
+    runningMove.incrementAndGet()
+    val maxSearchedDepth = depthSearchCount.indexOfLast { it.get() == moves.size }
+    val bestMove = depthBestMoves[maxSearchedDepth].get()
+    println("[INFO] Search Depth $maxSearchedDepth")
+    println("[INFO] Best move $bestMove")
+    println("[INFO] Evaluation ${depthBestScores[maxSearchedDepth]}")
+    return bestMove ?: randomMove(game)
   }
 
   override fun toString(): String {
