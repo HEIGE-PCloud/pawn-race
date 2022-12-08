@@ -1,9 +1,10 @@
 package pawnrace
 
-import java.io.PrintWriter
-import java.io.InputStreamReader
 import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.PrintWriter
 import java.util.concurrent.Executors
+import kotlin.math.max
 
 // You should not add any more member values or member functions to this class
 // (or change its name!). The auto-runner will load it in via reflection, and it
@@ -15,10 +16,6 @@ class PawnRace {
   fun playGame(colour: Char, output: PrintWriter, input: BufferedReader) {
     val timeLimit = 4800L // ms
     // init players
-    val threadCount = Runtime.getRuntime().availableProcessors() / 2 - 1
-    val availableThreadCount = threadCount - Thread.activeCount()
-    println("[INFO] Available thread count $availableThreadCount")
-    val executor = Executors.newFixedThreadPool(availableThreadCount)
     val me = Player(Piece(colour))
     val opponent = Player(Piece(colour).opposite())
     me.opponent = opponent
@@ -30,8 +27,8 @@ class PawnRace {
     // Send gaps with output.println()
 
     if (me.piece == Piece.BLACK) {
-      // TODO: Investigate openings and read it from a file
-      output.println("AH")
+      val openings = listOf("hd", "fg", "fb", "fe", "ae", "ed", "af", "fd", "bc", "gc", "da", "ec", "fa", "da")
+      output.println(openings.random())
       // println("[INFO] I suggest opening ${"AH"}")
     }
 
@@ -52,6 +49,10 @@ class PawnRace {
     // you may send your move, once you have decided what it will be, with output.println(move)
     // for example: output.println("axb4")
     // White player should decide what move to make and send it
+    val threadCount = Runtime.getRuntime().availableProcessors() / 2 - 1
+    val availableThreadCount = threadCount - Thread.activeCount()
+    println("[INFO] Available thread count ${max(availableThreadCount, 1)}")
+    val executor = Executors.newFixedThreadPool(threadCount - 1)
     if (me.piece == Piece.WHITE) {
       val move = me.makeMove(game, executor, preStartTime, timeLimit)
       game = game.applyMove(move)
@@ -95,9 +96,9 @@ class PawnRace {
     // Once the loop is over, the game has finished, and you may wish to print who has won
     // If your advanced AI has used any files, make sure you close them now!
     // tidy up resources, if any
-    while (!executor.isTerminated) {
+    do {
       executor.shutdownNow()
-    }
+    } while (!executor.isTerminated)
   }
 }
 
