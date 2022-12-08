@@ -165,13 +165,13 @@ class Player(val piece: Piece, var opponent: Player? = null) {
             if (score > depthBestScores[depth].get()) {
               depthBestScores[depth].set(score)
               depthBestMoves[depth].set(currentMove)
-              println(
-                "[DEBUG] Search depth $depth with move $currentMove completed, score $score, depthBestScore " +
-                  "${depthBestScores[depth]}," +
-                  " " +
-                  "depthBestMove ${depthBestMoves[depth]}"
-              )
             }
+            println(
+              "[DEBUG] Search depth $depth with move $currentMove completed, score $score, depthBestScore " +
+                "${depthBestScores[depth]}," +
+                " " +
+                "depthBestMove ${depthBestMoves[depth]}"
+            )
           }
         }
       }
