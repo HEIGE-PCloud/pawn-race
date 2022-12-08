@@ -77,8 +77,10 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     var standPat = colour * evaluate(game)
     alpha = max(alpha, standPat)
 
-    val moves = (if (colour == -1) game.moves(piece.opposite()) else game.moves(piece)).filter { it.type != MoveType
-      .PEACEFUL }
+    val moves = (if (colour == -1) game.moves(piece.opposite()) else game.moves(piece)).filter {
+      it.type != MoveType
+        .PEACEFUL
+    }
     for (move in moves) {
       val nextGame = game.applyMove(move)
       val score = -quiescence(nextGame, -beta, -alpha, -colour)
@@ -179,6 +181,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
           }
         }
       }
+      Thread.sleep(50)
     }
     Thread.sleep(startTime + timeLimit - System.nanoTime() / 1000000)
     runningMove.set(runningMove.get() + 1)
