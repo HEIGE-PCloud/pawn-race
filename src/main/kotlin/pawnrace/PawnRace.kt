@@ -92,7 +92,7 @@ class PawnRace {
       if (game.over()) break
     }
 
-    // Once the loop is over, the game has finished and you may wish to print who has won
+    // Once the loop is over, the game has finished, and you may wish to print who has won
     // If your advanced AI has used any files, make sure you close them now!
     // tidy up resources, if any
     while (!executor.isTerminated) {

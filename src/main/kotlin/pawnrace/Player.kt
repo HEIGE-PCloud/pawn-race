@@ -55,7 +55,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
 
   private fun distanceFromStart(pos: Position, piece: Piece): Int = abs(pos.rank.value - piece.startingRank())
 
-  fun evaluate(game: Game): Int {
+  private fun evaluate(game: Game): Int {
     val myPoss = getAllPawns(game.board)
     val oppoPoss = opponent!!.getAllPawns(game.board)
     val myScore = myPoss.fold(0) { acc, pos ->
@@ -69,27 +69,6 @@ class Player(val piece: Piece, var opponent: Player? = null) {
         5 * passedPawn(game.board, pos, opponent!!.piece)
     }
     return myScore - opponentScore
-  }
-
-  fun quiescence(game: Game, a: Int, b: Int, colour: Int): Int {
-    var alpha = a
-    val beta = b
-    var standPat = colour * evaluate(game)
-    alpha = max(alpha, standPat)
-
-    val moves = (if (colour == -1) game.moves(piece.opposite()) else game.moves(piece)).filter {
-      it.type != MoveType
-        .PEACEFUL
-    }
-    for (move in moves) {
-      val nextGame = game.applyMove(move)
-      val score = -quiescence(nextGame, -beta, -alpha, -colour)
-      standPat = max(standPat, score)
-      alpha = max(alpha, standPat)
-      if (alpha >= beta)
-        break
-    }
-    return standPat
   }
 
   private fun negamax(game: Game, depth: Int, a: Int, b: Int, colour: Int, runMove: Int): Int {
