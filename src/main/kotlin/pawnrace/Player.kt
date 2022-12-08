@@ -160,16 +160,18 @@ class Player(val piece: Piece, var opponent: Player? = null) {
         val runMove = runningMove.get()
         executor.submit {
           val score = -negamax(currentGame, depth, INT_MIN, INT_MAX, -1, runMove)
-          depthSearchCount[depth].incrementAndGet()
-          if (runMove == runningMove.get() && score > depthBestScores[depth].get()) {
-            depthBestScores[depth].set(score)
-            depthBestMoves[depth].set(currentMove)
-            println(
-              "[DEBUG] Search depth $depth with move $currentMove completed, score $score, depthBestScore " +
-                "${depthBestScores[depth]}," +
-                " " +
-                "depthBestMove ${depthBestMoves[depth]}"
-            )
+          if (runMove == runningMove.get()) {
+            depthSearchCount[depth].incrementAndGet()
+            if (score > depthBestScores[depth].get()) {
+              depthBestScores[depth].set(score)
+              depthBestMoves[depth].set(currentMove)
+              println(
+                "[DEBUG] Search depth $depth with move $currentMove completed, score $score, depthBestScore " +
+                  "${depthBestScores[depth]}," +
+                  " " +
+                  "depthBestMove ${depthBestMoves[depth]}"
+              )
+            }
           }
         }
       }
