@@ -188,9 +188,9 @@ class Player(val piece: Piece, var opponent: Player? = null) {
 
 
 //    println("[DEBUG] runningMove has been updated to ${runningMove}")
-    println("[INFO] Search Depth $maxSearchDepth")
-    println("[INFO] Best move ${bestMove.get()}")
-    println("[INFO] Evaluation ${bestScore.get()}")
+//    println("[INFO] Search Depth $maxSearchDepth")
+//    println("[INFO] Best move ${bestMove.get()}")
+//    println("[INFO] Evaluation ${bestScore.get()}")
     return bestMove.get() ?: randomMove(game)
   }
 
