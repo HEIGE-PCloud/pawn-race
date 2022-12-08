@@ -6,7 +6,8 @@ import java.io.PrintWriter
 import java.util.concurrent.Executors
 import kotlin.math.max
 
-// You should not add any more member values or member functions to this class
+
+  // You should not add any more member values or member functions to this class
 // (or change its name!). The auto-runner will load it in via reflection, and it
 // will be safer for you to just call your code from within the playGame member
 // function, without any unexpected surprises!
@@ -20,7 +21,22 @@ class PawnRace {
     val opponent = Player(Piece(colour).opposite())
     me.opponent = opponent
     opponent.opponent = me
-    // println("[INFO] Players initialized, my colour is $colour")
+    val file = File("data.txt")
+    try {
+      val fr = FileReader(file)
+      val br = BufferedReader(fr)
+
+      val lines = br.readLines()
+      br.close()
+      fr.close()
+      me.transpositionTable = deserializeTranspositionTable(lines, me, opponent)
+
+    } catch (ioe: IOException) {
+      ioe.printStackTrace()
+    }
+
+
+//    println("[INFO] Players initialized, my colour is $colour")
     // You should call your code from within here
     // Step 1: If you are the black player, you should send a string containing the gaps
     // It should be of the form "wb" with the white gap first and then the black gap: i.e. "AH"
@@ -96,7 +112,21 @@ class PawnRace {
     // Once the loop is over, the game has finished, and you may wish to print who has won
     // If your advanced AI has used any files, make sure you close them now!
     // tidy up resources, if any
-    do {
+    executor.shutdownNow()
+    try {
+      val fw = FileWriter(file, true)
+      val bw = BufferedWriter(fw)
+      for (line in serializeTranspositionTable(me.transpositionTable)) {
+        bw.write(line)
+        bw.newLine()
+      }
+      bw.close()
+      fw.close()
+
+    } catch (ioe: IOException) {
+      ioe.printStackTrace()
+    }
+    while (!executor.isTerminated) {
       executor.shutdownNow()
     } while (!executor.isTerminated)
   }

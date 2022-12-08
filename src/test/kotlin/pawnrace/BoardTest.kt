@@ -8,7 +8,18 @@ class BoardTest {
   private val board1 = Board(File(0), File(0))
   private val board2 = Board(File(0), File(7))
   private val board3 = Board(File('h'), File('a'))
-
+  private val board4 = Board(
+    arrayOf(
+      "........",
+      "..B.B.B.",
+      ".......B",
+      ".B.B.B..",
+      ".W.W.W..",
+      ".......W",
+      "..W.W.W.",
+      "........",
+    )
+  )
 
   @Test
   fun `test init`() {
@@ -255,4 +266,12 @@ class BoardTest {
     assertEquals(true, board34.isValidMove(move5, move4))
   }
 
+  @Test
+  fun `test hash`() {
+    assertEquals(board1.hash, Board(board1.hash).hash)
+    assertEquals(board1, Board(board1.hash))
+    assertEquals(board2, Board(board2.hash))
+    assertEquals(board3, Board(board3.hash))
+    assertEquals(board4, Board(board4.hash))
+  }
 }

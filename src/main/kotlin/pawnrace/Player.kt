@@ -1,6 +1,7 @@
 package pawnrace
 
-import java.util.concurrent.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.abs
@@ -15,11 +16,13 @@ const val EXACT = 0
 const val LOWER_BOUND = 1
 const val UPPER_BOUND = 2
 
+data class TableItem (val depth: Int, val flag: Int, val value: Int)
+
 class Player(val piece: Piece, var opponent: Player? = null) {
   private var runningMove = AtomicInteger(0)
 
   // map a game to (depth, flag, value)
-  private val transpositionTable: ConcurrentHashMap<Game, Triple<Int, Int, Int>> = ConcurrentHashMap()
+  var transpositionTable: ConcurrentHashMap<Game, TableItem> = ConcurrentHashMap()
   private fun getAllPawns(board: Board): List<Position> = board.positionsOf(piece)
 
   /**
@@ -121,7 +124,7 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     } else {
       EXACT
     }
-    transpositionTable[game] = Triple(depth, enFlag, value)
+    transpositionTable[game] = TableItem(depth, enFlag, value)
     return value
   }
 
@@ -170,4 +173,40 @@ class Player(val piece: Piece, var opponent: Player? = null) {
   override fun toString(): String {
     return "Player $piece"
   }
+
+  override fun equals(other: Any?): Boolean = when(other) {
+    is Player -> other.piece == piece
+    else -> false
+  }
+
+  override fun hashCode(): Int = piece.hashCode()
+}
+
+fun serializeTranspositionTable(table: ConcurrentHashMap<Game, TableItem>): List<String> = table.entries.map { it ->
+  val game = it.key
+  val (depth, flag, value) = it.value
+  val (h1, h2) = game.board.hash
+  val piece = game.player.piece.ordinal
+  val lastMove = game.lastMove
+  if (lastMove == null) ""
+  else "$h1 $h2 $piece ${lastMove.piece.ordinal} ${lastMove.from} ${lastMove.to} ${lastMove.type.ordinal} $depth $flag $value"
+}
+
+fun deserializeTranspositionTable(lines: List<String>, player1: Player, player2: Player): ConcurrentHashMap<Game,
+  TableItem> {
+  val map = ConcurrentHashMap<Game, TableItem>()
+  lines.forEach {
+    val words = it.split(" ")
+    if (words.size != 10) return ConcurrentHashMap()
+    val h1 = words[0].toULong()
+    val h2 = words[1].toULong()
+    val board = Board(Pair(h1, h2))
+    val piece = Piece.values()[words[2].toInt()]
+    val me = if (piece == player1.piece) player1 else player2
+    val lastMove = Move(Piece.values()[words[3].toInt()], Position(words[4]), Position(words[5]), MoveType.values()[words[6].toInt()])
+
+    val game = Game(board, me, lastMove)
+    map[game] = TableItem(words[7].toInt(), words[8].toInt(), words[9].toInt())
+  }
+  return map
 }

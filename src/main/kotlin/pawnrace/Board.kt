@@ -18,7 +18,7 @@ class Board(private val board: List<List<Piece?>>) {
    * if it is empty, then a 0 is placed
    * each hash uniquely determines a board
    */
-  private val hash: Pair<ULong, ULong>
+  val hash: Pair<ULong, ULong>
 
   constructor(whiteGap: File, blackGap: File) : this(List(BOARD_SIZE) { i ->
     when (i) {
@@ -53,6 +53,18 @@ class Board(private val board: List<List<Piece?>>) {
     }
   })
 
+  constructor(hash: Pair<ULong, ULong>) : this(List(BOARD_SIZE) { i ->
+    List(BOARD_SIZE) { j ->
+      val (h1, h2) = hash
+      val len = i * BOARD_SIZE + j
+      val d1: ULong = (h1 shr len) and 1UL
+      val d2: ULong = (h2 shr len) and 1UL
+      when (d1) {
+        0UL -> null
+        else -> Piece.values()[d2.toInt()]
+      }
+    }
+  })
   init {
     var first: ULong = 0UL
     var second: ULong = 0UL
