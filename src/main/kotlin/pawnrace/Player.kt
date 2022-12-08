@@ -145,12 +145,14 @@ class Player(val piece: Piece, var opponent: Player? = null) {
               depthBestScores[depth].set(score)
               depthBestMoves[depth].set(currentMove)
             }
+            /*
             println(
               "[DEBUG] Search depth $depth with move $currentMove completed, score $score, depthBestScore " +
                 "${depthBestScores[depth]}," +
                 " " +
                 "depthBestMove ${depthBestMoves[depth]}"
             )
+            */
           }
         }
       }
@@ -159,14 +161,13 @@ class Player(val piece: Piece, var opponent: Player? = null) {
     runningMove.incrementAndGet()
     val maxSearchedDepth = depthSearchCount.indexOfLast { it.get() == moves.size }
     val bestMove = depthBestMoves[maxSearchedDepth].get()
-    println("[INFO] Search Depth $maxSearchedDepth")
-    println("[INFO] Best move $bestMove")
-    println("[INFO] Evaluation ${depthBestScores[maxSearchedDepth]}")
+    // println("[INFO] Search Depth $maxSearchedDepth")
+    // println("[INFO] Best move $bestMove")
+    // println("[INFO] Evaluation ${depthBestScores[maxSearchedDepth]}")
     return bestMove ?: randomMove(game)
   }
 
   override fun toString(): String {
     return "Player $piece"
   }
-
 }

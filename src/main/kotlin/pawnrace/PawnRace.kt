@@ -1,4 +1,4 @@
-  package pawnrace
+package pawnrace
 
 import java.io.PrintWriter
 import java.io.InputStreamReader
@@ -23,7 +23,7 @@ class PawnRace {
     val opponent = Player(Piece(colour).opposite())
     me.opponent = opponent
     opponent.opponent = me
-//    println("[INFO] Players initialized, my colour is $colour")
+    // println("[INFO] Players initialized, my colour is $colour")
     // You should call your code from within here
     // Step 1: If you are the black player, you should send a string containing the gaps
     // It should be of the form "wb" with the white gap first and then the black gap: i.e. "AH"
@@ -32,7 +32,7 @@ class PawnRace {
     if (me.piece == Piece.BLACK) {
       // TODO: Investigate openings and read it from a file
       output.println("AH")
-//      println("[INFO] I suggest opening ${"AH"}")
+      // println("[INFO] I suggest opening ${"AH"}")
     }
 
     // Regardless of your colour, you should now receive the gaps verified by the auto-runner
@@ -41,23 +41,23 @@ class PawnRace {
     // receive the confirmed gaps with input.readLine()
     val gaps = input.readLine()
     val preStartTime = System.nanoTime() / 1000000
-//    println("[INFO] Actual opening gaps $gaps")
+    // println("[INFO] Actual opening gaps $gaps")
     // Now you may construct your initial board
     // Initialise the board state
     val board = Board(File(gaps[0]), File(gaps[1]))
     var game = Game(board, me)
-//    println("[INFO] Game initialized")
-    println(game.board)
+    // println("[INFO] Game initialized")
+    // println(game.board)
     // If you are the white player, you are now allowed to move
     // you may send your move, once you have decided what it will be, with output.println(move)
     // for example: output.println("axb4")
     // White player should decide what move to make and send it
     if (me.piece == Piece.WHITE) {
-      val move = me.makeMove(game, executor,  preStartTime, timeLimit)
+      val move = me.makeMove(game, executor, preStartTime, timeLimit)
       game = game.applyMove(move)
       output.println(move)
-//      println("[INFO] My move is $move")
-      println(game.board)
+      // println("[INFO] My move is $move")
+      // println(game.board)
 
     }
     // After point, you may create a loop which waits to receive the other players move
@@ -79,15 +79,15 @@ class PawnRace {
       val startTime = System.nanoTime() / 1000000
       val opponentMove = game.parseMove(opponent.piece, opponentMoveString)
       game = game.applyMove(opponentMove!!)
-      println(game.board)
+      // println(game.board)
 
       if (game.over()) break
       val move: Move = me.makeMove(game, executor, startTime, timeLimit)
       output.println(move)
       game = game.applyMove(move)
 
-//      println("[INFO] My move is $move")
-      println(game.board)
+      // println("[INFO] My move is $move")
+      // println(game.board)
 
       if (game.over()) break
     }
