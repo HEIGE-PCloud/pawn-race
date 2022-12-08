@@ -11,12 +11,12 @@ const val BLACK_START_RANK = 6
  */
 class Board(private val board: List<List<Piece?>>) {
   /**
-   * hash.first is a 64-bit unsigned integer, each digit represents
+   * first is a 64-bit unsigned integer, each digit represents
    * whether there exists a chess on that grid
-   * hash.second is a 64-bit unsigned integer as well,
+   * second is a 64-bit unsigned integer as well,
    * each digit represents the color of the chess there
    * if it is empty, then a 0 is placed
-   * each hash uniquely determins a board
+   * each hash uniquely determines a board
    */
   private val hash: Pair<ULong, ULong>
 
@@ -54,15 +54,15 @@ class Board(private val board: List<List<Piece?>>) {
   })
 
   init {
-    var first: ULong = 0u
-    var second: ULong = 0u
+    var first: ULong = 0UL
+    var second: ULong = 0UL
     for (i in 0 until BOARD_SIZE) {
       for (j in 0 until BOARD_SIZE) {
         val pos = i * BOARD_SIZE + j
         if (board[i][j] != null) {
-          first += (1u shl pos)
+          first += (1UL shl pos)
           if (board[i][j] == Piece.WHITE) {
-            second += (1u shl pos)
+            second += (1UL shl pos)
           }
         }
       }
