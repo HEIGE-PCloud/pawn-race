@@ -33,6 +33,14 @@ The standard algebraic notation is used to record each move. Peaceful moves are 
 10. The code submitted by the Top 4 winners will be inspected after the end of the tournament and you may be invited to explain how it works.
 11. You may use up to 1 MB of pre-computed data.
 
-## AI
+## Implementation of AI
 
-The AI uses the [negamax algorithm](https://en.wikipedia.org/wiki/Negamax) to search the game tree and make moves. It also applies the alpha-beta pruning and transposition table to make the algorithm more efficient. A simple and fast evaluation function is used to make the search efficient. I also use the iterative deepening technique to keep the AI searching until it reaches the time limit. 
+Since no third-party library is allowed, the idea of implementing a neutral network is not attractive any more as that requires to write a linear algebra library purely by hand, and the training and running procedure cannot utlize any GPU acceleration. This ultemately makes the depths and number of nodes in the neutral network very limited, which results in a much poorer performance comparing to a hand-coded evaludation function. There is also no need to implement a policy network since the max number of brancing factor is merely 14 at the beginning of the game, and it then decreases as pieces get captured or move into a stalement. So a normal evaluation function plus a tree search would be sufficient to achieve a decent result under those tournament rules. In fact, there is a [NN implementation](https://github.com/JordanLloydHall/pawnRace) from preious tournament and as expected, it loses 5-0 against my implementation.
+
+My AI uses the [negamax algorithm](https://en.wikipedia.org/wiki/Negamax) to search the game tree and make moves. It also applies the alpha-beta pruning and transposition table to make the algorithm more efficient. A simple and fast evaluation function is used to make the search efficient. The iterative deepening framework is also used to keep the AI searching until it reaches the time limit. Upon that, a Java thread pool is used to parallized the search and attempt to utlize as many threads as possible. It tooks some time to get the concurrency right but the performance gain pays off.
+
+I attempted to cache the data of the transposition table to dist, but it exceeds several hundred megabytes very quickly, making the caching not very feasible in the tournament. 
+
+This particular implementation is far from perfect, a simple improvement is to use a bitboard implementattion to accelerate the board access. I have set up foundation for the bitboard representation, but it is only used when comparing equality inside the hash map. More board accessing and manipulation functions needs to be added to make it more useful.
+
+The AI performs particularly well in the mid-late game, as it is performent enough to find a winning strategy. But it's openning is still a bit weak, due to the relatively simple evaluation function, its move is not always optimal.
