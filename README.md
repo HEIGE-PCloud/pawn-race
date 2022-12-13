@@ -41,10 +41,17 @@ Traditionally, the white player always starts the game. Both players take turns 
 
 Since no third-party library is allowed, the idea of implementing a neural network is not attractive anymore as that requires writing a linear algebra library purely by hand, and the training and running procedure cannot utilise any GPU acceleration. This ultimately makes the depths and number of nodes in the neutral network very limited, which results in a much poorer performance compared to a hand-coded evaluation function. There is also no need to implement a policy network since the max number of branching factors is merely 14 at the beginning of the game, and it then decreases as pieces get captured or move into a stalemate. So a normal evaluation function plus a tree search would be sufficient to achieve a decent result under those tournament rules. There is a [NN implementation](https://github.com/JordanLloydHall/pawnRace) from the previous tournament and as expected, it loses 5-0 against my implementation.
 
-My AI uses the [negamax algorithm](https://en.wikipedia.org/wiki/Negamax) to search the game tree and make moves. It also applies the alpha-beta pruning and transposition table to make the algorithm more efficient. A simple and fast evaluation function is used to make the search efficient. The iterative deepening framework is also used to keep the AI searching until it reaches the time limit. Upon that, a Java thread pool is used to paralyse the search and attempt to utilise as many threads as possible. It took some time to get the concurrency right but the performance gain pays off.
+My AI uses the [negamax algorithm](https://en.wikipedia.org/wiki/Negamax) to search the game tree and make moves. It also applies the [alpha-beta pruning](https://en.wikipedia.org/wiki/Alpha–beta_pruning) and [transposition table](https://en.wikipedia.org/wiki/Transposition_table) to make the algorithm more efficient. A simple and fast evaluation function is used to make the search efficient. The [iterative deepening](https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search) framework is also used to keep the AI searching until it reaches the time limit. Upon that, a [Java thread pool](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Executors.html#newFixedThreadPool-int-) is used to paralyse the search and attempt to utilise as many threads as possible. It took some time to get the concurrency right but the performance gain pays off.
 
 I attempted to cache the data of the transposition table to dist, but it exceeds several hundred megabytes very quickly, making the caching not very feasible in the tournament. 
 
-This particular implementation is far from perfect, a simple improvement is to use a bitboard implementation to accelerate the board access. I have set up a foundation for the bitboard representation, but it is only used when comparing equality inside the hash map. More board accessing and manipulation functions need to be added to make it more useful.
+This particular implementation is far from perfect, a simple improvement is to use a [bitboard](https://en.wikipedia.org/wiki/Bitboard) implementation to accelerate the board access. I have set up a foundation for the bitboard representation, but it is only used when comparing equality inside the hash map. More board accessing and manipulation functions need to be added to make it more useful.
 
 The AI performs particularly well in the mid-late game, as it is performant enough to find a winning strategy. But its opening is still a bit weak, due to the relatively simple evaluation function, its move is not always optimal.
+
+## References
+
+The following websites provide enormous help for me when developing AI.
+
+- https://www.chessprogramming.org/Search
+- https://www.chessprogramming.org/Pawn_Structure
