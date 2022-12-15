@@ -45,9 +45,13 @@ My AI uses the [negamax algorithm](https://en.wikipedia.org/wiki/Negamax) to sea
 
 I attempted to cache the data of the transposition table to dist, but it exceeds several hundred megabytes very quickly, making the caching not very feasible in the tournament. 
 
-This particular implementation is far from perfect, a simple improvement is to use a [bitboard](https://en.wikipedia.org/wiki/Bitboard) implementation to accelerate the board access. I have set up a foundation for the bitboard representation, but it is only used when comparing equality inside the hash map. More board accessing and manipulation functions need to be added to make it more useful.
+This particular implementation is far from perfect, a simple improvement is to use a [bitboard](https://en.wikipedia.org/wiki/Bitboard) implementation to accelerate the board access. I have set up a foundation for the bitboard representation, but it is only used when comparing equality inside the hash map. More board accessing and manipulation functions need to be added to make it more useful. Another one would be to enable the AI to keep computing while the opponent is calculating, this may increases the search depth a little but it adds a lot of compleixty to the concurrency design so it was not implemented for the tournament version.
 
 The AI performs particularly well in the mid-late game, as it is performant enough to find a winning strategy. But its opening is still a bit weak, due to the relatively simple evaluation function, its move is not always optimal.
+
+## Result
+
+This AI successfully won the 2022-23 Pawn Race Competition!
 
 ## References
 
