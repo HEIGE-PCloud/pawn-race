@@ -1,5 +1,7 @@
 # Pawn Race
 
+> Check out the [tournament](https://github.com/HEIGE-PCloud/pawn-race/tree/tournament) tag for the competition submission code.
+
 ## Board and setup
 
 Pawn races are played on a normal chess board, with 8x8 squares. Rows are commonly referred to as *ranks*, and are labelled 1-8, while columns are referred to as *files*, labelled A-H. From white's perspective, the square in the bottom left corner would thus be referred to as a1, while the bottom right corner is h1. White's pawns are all placed on the second rank initially, while black starts from the seventh rank. The following picture shows an example of an initial setup, in which the gaps were chosen on the H and A files, for white and black respectively.
